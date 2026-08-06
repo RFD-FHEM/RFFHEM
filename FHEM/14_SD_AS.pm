@@ -75,13 +75,10 @@ SD_AS_Define
 		if(int(@a) != 3);
 
   $hash->{CODE}    = $a[2];
-  $hash->{lastMSG} =  "";
-  $hash->{bitMSG} =  "";
 
   $modules{AS}{defptr}{$a[2]} = $hash;
-  $hash->{STATE} = "Defined";
 
-  return undef;
+  return;
 }
 
 #####################################
@@ -90,7 +87,7 @@ SD_AS_Undef
 {
   my ($hash, $name) = @_;
   delete($modules{AS}{defptr}{$hash->{CODE}}) if($hash && $hash->{CODE});
-  return undef;
+  return;
 }
 
 #####################################
