@@ -1,3 +1,7 @@
+2026-08-06 - Internal variable STATE should not be set in Define (#1387)
+
+* Update 14_SD_WS.pm
+Internal variable STATE should not be set in Define
 2026-08-05 - Internal variable STATE should not be set in Define. (#1386)
 
 * Update 14_SD_WS07.pm
