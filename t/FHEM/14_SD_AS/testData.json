@@ -94,7 +94,7 @@
                "NAME" : "ArduinoSensor_humidity_2"
             },
             "readings" : {
-               "battery" : "ok",
+               "battery" : "optimal",
                "batteryState" : "ok",
                "humidity" : "66.5",
                "state" : "H: 66.5",
