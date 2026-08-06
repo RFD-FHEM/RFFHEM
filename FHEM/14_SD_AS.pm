@@ -78,7 +78,7 @@ SD_AS_Define
 
   $modules{AS}{defptr}{$a[2]} = $hash;
 
-  return undef;
+  return;
 }
 
 #####################################
@@ -87,7 +87,7 @@ SD_AS_Undef
 {
   my ($hash, $name) = @_;
   delete($modules{AS}{defptr}{$hash->{CODE}}) if($hash && $hash->{CODE});
-  return undef;
+  return;
 }
 
 #####################################
