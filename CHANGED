@@ -1,3 +1,10 @@
+2026-08-06 - Internal variable STATE should not be set in Define. (#1389)
+
+* Update 14_SD_AS.pm
+Removed some settings in "Define".
+perlcritic ""return" statement with explicit "undef" (See page 199 of PBP)"
+* Update testData.json
+add Test with CRC
 2026-08-06 - Internal variable STATE should not be set in Define (#1387)
 
 * Update 14_SD_WS.pm
