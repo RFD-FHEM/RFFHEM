@@ -142,13 +142,9 @@ sub SD_WS_Define {
   return "wrong syntax: define <name> SD_WS <code> ".int(@a) if(int(@a) < 3 );
 
   $hash->{CODE} = $a[2];
-  $hash->{lastMSG} =  "";
-  $hash->{bitMSG} =  "";
 
   $modules{SD_WS}{defptr}{$a[2]} = $hash;
-  $hash->{STATE} = "Defined";
 
-  my $name= $hash->{NAME};
   return;
 }
 
