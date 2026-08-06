@@ -81,11 +81,8 @@ sub FLAMINGO_Define {
   return 'ERROR: wrong model: '.$a[3] . "\n\n(allowed modelvalues: " . join(' | ', sort %models).')' if $a[3] && ( !grep { $_ eq $a[3] } %models );
 
   $hash->{CODE}     = $a[2];
-  $hash->{lastMSG}  = 'no data';
-  $hash->{bitMSG}   = 'no data';
 
   $modules{FLAMINGO}{defptr}{$a[2]} = $hash;
-  $hash->{STATE} = 'Defined';
 
   my $name = $hash->{NAME};
   my $iodev;
