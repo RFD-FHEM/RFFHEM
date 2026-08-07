@@ -166,8 +166,6 @@ sub Define {
   $doubleCode = $models{$hash_name}{doubleCode};                              # read note doubleCode
 
   $hash->{doubleCode} =  'Code alternates between two RAWMSG' if($protocol == 41);
-  $hash->{bitMSG} =  '';
-  $hash->{lastMSG} =  '';
 
   $iodevice = $a[4] if($a[4]);
 

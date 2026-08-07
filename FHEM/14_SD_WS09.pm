@@ -58,17 +58,13 @@ sub SD_WS09_Define {
 	return "wrong syntax: define <name> SD_WS09 <code> ".int(@a) if(int(@a) < 3 );
 
 	$hash->{CODE} = $a[2];
-	$hash->{lastMSG} =  "";
-	$hash->{bitMSG} =  "";
 
 	$modules{SD_WS09}{defptr}{$a[2]} = $hash;
-	$hash->{STATE} = "Defined";
 
 	my $model = $a[2];
 	$model =~ s/_.*$//;
 	$hash->{MODEL} = $model;
 
-	my $name= $hash->{NAME};
 	return ;
 }
 

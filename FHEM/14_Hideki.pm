@@ -135,10 +135,8 @@ sub Hideki_Define {
   return "wrong syntax: define <name> Hideki <code>".int(@a)
     if(int(@a) < 3);
 
-  $hash->{CODE}    = $a[2];
-  $hash->{lastMSG} =  '';
+  $hash->{CODE} = $a[2];
 
-  my $name= $hash->{NAME};
   $modules{Hideki}{defptr}{$a[2]} = $hash;
 
   return;
