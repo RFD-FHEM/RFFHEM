@@ -1,3 +1,17 @@
+2026-08-07 - Internal variable STATE should not be set in Define. (#1390)
+
+* Update 14_SD_BELL.pm
+Removed the setting of bitMSG and lastMSG from the Define subroutine.
+* Update 14_SD_WS_Maverick.pm
+Removed the setting of STATE and lastMSG from the Define subroutine.
+* Update 14_SD_WS09.pm
+Removed the setting of STATE, bitMSG and lastMSG from the Define subroutine.
+Removed unused variable $name from the Define subroutine.
+* Update 14_FLAMINGO.pm
+Removed the setting of STATE, bitMSG and lastMSG from the Define subroutine.
+* Update 14_Hideki.pm
+Removed the setting of lastMSG from the Define subroutine.
+Removed unused variable $name from the Define subroutine.
 2026-08-06 - Internal variable STATE should not be set in Define. (#1389)
 
 * Update 14_SD_AS.pm
