@@ -1,4 +1,5 @@
 #!/bin/bash
+set -uo pipefail
 
 SRC="${PWD}"
 declare -r FHEM_DIR="/opt/fhem"
@@ -8,92 +9,86 @@ WHITELIST=("t" "FHEM" "lib")
 
 # Als-ob-Modus aktivieren (Standard: false, kann mit "--dry-run" aktiviert werden)
 DRY_RUN=false
-if [[ "$1" == "--dry-run" ]]; then
+if [[ "${1:-}" == "--dry-run" ]]; then
     DRY_RUN=true
     echo "Running in DRY RUN mode. No changes will be made."
 fi
 
-# Array für "virtuell verlinkte" Verzeichnisse
-declare -a LINKED_DIRS=()
-
-# Prüft, ob ein Pfad zur Whitelist gehört
-is_whitelisted() {
-    local path="$1"
-    for pattern in "${WHITELIST[@]}"; do
-        if [[ "$path" == "$pattern" || "$path" == "$pattern/"* ]]; then
-            return 0  # in Whitelist
-        fi
-    done
-    return 1  # nicht in Whitelist
+# Resolve a path to its physical location. Works for paths that do not exist yet
+# and, crucially, follows symlinked parent directories.
+resolve_path() {
+    readlink -m -- "$1"
 }
 
-# Prüft, ob ein Pfad unter einem bereits "virtuell verlinkten" Ordner liegt
-is_under_linked() {
-    local rel_path="$1"
-    for ld in "${LINKED_DIRS[@]}"; do
-        if [[ "$rel_path" == "$ld" || "$rel_path" == "$ld/"* ]]; then
-            return 0
-        fi
-    done
-    return 1
+# A target may resolve back into the source tree when one of its parent
+# directories is a symlink into $SRC (for example /opt/fhem/t -> $SRC/t).
+# Writing there would replace the repository's own file with a link to itself,
+# destroying the file. Never touch such a target.
+points_at_source() {
+    local item="$1" target="$2"
+    [[ "$(resolve_path "$target")" == "$(resolve_path "$item")" ]]
 }
 
-# Für jedes Muster der Whitelist suchen wir rekursiv
+link_file() {
+    local item="$1" target="$2"
+
+    if [[ -L "$target" && "$(readlink -- "$target")" == "$item" ]]; then
+        return  # already linked, nothing to do
+    fi
+
+    if points_at_source "$item" "$target"; then
+        echo "Skipping (target resolves to the source file itself): $item"
+        return
+    fi
+
+    if [[ "$DRY_RUN" == true ]]; then
+        echo "[DRY RUN] Would create file link: $target -> $item"
+        return
+    fi
+
+    rm -f -- "$target"
+    ln -s "$item" "$target"
+    echo "Created file link: $target -> $item"
+}
+
+# Directories are always materialised as real directories, never as symlinks.
+# Linking a whole directory hides whatever FHEM ships underneath it – that is how
+# /opt/fhem/lib once shadowed the complete FHEM core library and broke every
+# module test with "Can't locate FHEM/Core/Utils/Math.pm".
+make_directory() {
+    local item="$1" target="$2"
+
+    if [[ -d "$target" && ! -L "$target" ]]; then
+        return
+    fi
+
+    if points_at_source "$item" "$target"; then
+        echo "Skipping (target resolves to the source directory itself): $item"
+        return
+    fi
+
+    if [[ "$DRY_RUN" == true ]]; then
+        echo "[DRY RUN] Would create directory: $target"
+        return
+    fi
+
+    # A stale symlink standing in for the directory has to go first.
+    [[ -L "$target" ]] && rm -f -- "$target"
+    mkdir -p -- "$target"
+    echo "Created directory: $target"
+}
+
 for pattern in "${WHITELIST[@]}"; do
-    find "$SRC/$pattern" -mindepth 1 -print0 2>/dev/null | sort -z | while IFS= read -r -d '' item; do
-        rel_path="${item#$SRC/}"
+    [[ -d "$SRC/$pattern" ]] || continue
+
+    while IFS= read -r -d '' item; do
+        rel_path="${item#"$SRC"/}"
         target="$FHEM_DIR/$rel_path"
 
-        if ! is_whitelisted "$rel_path"; then
-            echo "Skipping (not in whitelist): $item"
-            continue
-        fi
-
-        # Prüfen, ob der Ordner bereits "virtuell verlinkt" wurde
-        if is_under_linked "$rel_path"; then
-            echo "Skipping (parent directory already virtually linked): $item"
-            continue
-        fi
-
         if [[ -d "$item" ]]; then
-            # Falls es sich um einen Ordner handelt
-            if [[ ! -e "$target" ]]; then
-                if [[ "$DRY_RUN" == true ]]; then
-                    echo "[DRY RUN] Would create directory link: $target -> $item"
-                else
-                    ln -s "$item" "$target"
-                    echo "Created directory link: $target -> $item"
-                fi
-                # Speichere diesen Ordner als "virtuell verlinkt"
-                LINKED_DIRS+=("$rel_path")
-            fi
+            make_directory "$item" "$target"
         else
-            # Falls eine Datei verarbeitet wird, prüfen, ob ihr Elternverzeichnis schon "virtuell verlinkt" ist
-            parent_dir=$(dirname "$rel_path")
-            if is_under_linked "$parent_dir"; then
-                echo "Skipping (parent directory already virtually linked): $item"
-                continue
-            fi
-
-            # Prüfen, ob die Datei im Ziel existiert
-            if [[ -f "$target" || -L "$target" ]]; then
-                if [[ "$DRY_RUN" == true ]]; then
-                    echo "[DRY RUN] Would replace existing file: $target"
-                else
-                    rm -f "$target"
-                    echo "Removed existing file: $target"
-                fi
-            fi
-
-            # Erstellen des Links
-            if [[ ! -e "$target" ]]; then
-                if [[ "$DRY_RUN" == true ]]; then
-                    echo "[DRY RUN] Would create file link: $target -> $item"
-                else
-                    ln -s "$item" "$target"
-                    echo "Created file link: $target -> $item"
-                fi
-            fi
+            link_file "$item" "$target"
         fi
-    done
+    done < <(find "$SRC/$pattern" -mindepth 1 -print0 2>/dev/null | sort -z)
 done

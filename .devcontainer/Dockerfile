@@ -11,6 +11,7 @@ RUN apt-get update && \
         git \
         gcc\
         g++ \
+        avrdude \
         && \
     rm -rf /var/lib/apt/lists/*
 
