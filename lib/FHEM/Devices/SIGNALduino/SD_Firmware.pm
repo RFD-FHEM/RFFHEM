@@ -5,6 +5,7 @@ use warnings;
 use Carp;
 use Exporter qw(import);
 use Symbol 'gensym';
+use Time::HiRes qw(gettimeofday);
 use IPC::Open3;
 
 our $VERSION = "0.01";
@@ -155,7 +156,7 @@ sub SIGNALduino_PrepareFlash {
   }
   $hash->{helper}{avrdudecmd} =~ s/\Q[BAUDRATE]\E/$baudrate/;
   $log .= "command: $hash->{helper}{avrdudecmd}\n\n";
-  main::FHEM::Core::Timer::Helper::addTimer($name,main::gettimeofday() + 1,\&SIGNALduino_avrdude,$name);
+  main::FHEM::Core::Timer::Helper::addTimer($name,gettimeofday() + 1,\&SIGNALduino_avrdude,$name);
   $hash->{helper}{avrdudelogs} = $log;
   return ;
 }
