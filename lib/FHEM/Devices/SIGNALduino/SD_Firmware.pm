@@ -6,6 +6,7 @@ use Carp;
 use Exporter qw(import);
 use Symbol 'gensym';
 use Time::HiRes qw(gettimeofday);
+use File::Spec;
 use IPC::Open3;
 
 our $VERSION = "0.01";
@@ -34,7 +35,9 @@ sub SIGNALduino_avrdude {
 
   main::readingsSingleUpdate($hash,'state','FIRMWARE UPDATE running',1);
   $hash->{helper}{avrdudelogs} .= "$name closed\n";
-  my $logFile = main::AttrVal('global', 'logdir', './log/') . "$hash->{TYPE}-Flash.log";
+  # Join with catfile: "logdir" may or may not end in a separator, and plain
+  # concatenation turns "/var/log/fhem" into "/var/log/fhemSIGNALduino-Flash.log".
+  my $logFile = File::Spec->catfile(main::AttrVal('global', 'logdir', './log/'), "$hash->{TYPE}-Flash.log");
 
   if (-e $logFile) {
     unlink $logFile;

@@ -144,6 +144,34 @@ subtest 'avrdude tests' => sub {
     $mock_main->restore('AttrVal');
   };
 
+  # "logdir" may be configured without a trailing separator. Plain concatenation turned
+  # "/tmp" into "/tmpSIGNALduino-Flash.log", so the log was written next to the intended
+  # directory - or, where that path was not writable, the shell aborted at the redirection
+  # and avrdude never ran, leaving only the misleading "created no log file" warning.
+  subtest 'logdir without trailing separator still yields a valid logfile path' => sub {
+    plan(4);
+    # File::Temp hands back a path without a trailing separator, which is exactly the
+    # configuration that used to break. A private directory also keeps the "file ends up
+    # inside logdir" check meaningful - /tmp already holds a log from the subtests above.
+    my $logdir = tempdir(CLEANUP => 1);
+    $mock_main->override('AttrVal' => sub {
+        my ($name, $attr, $default) = @_;
+        if($attr eq 'logdir') {      return $logdir;    }
+        return $default;
+    });
+
+    $targetHash->{helper}{avrdudecmd}=q[perl -e '{ exit(0); }' 2>> [LOGFILE]];
+    my $ret = FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_avrdude($target);
+
+    like($targetHash->{helper}->{avrdudecmd}, qr{\Q2>> $logdir/SIGNALduino-Flash.log\E\z}, "separator is inserted between logdir and filename");
+    unlike($targetHash->{helper}->{avrdudecmd}, qr{\Q${logdir}SIGNALduino\E}, "path is not concatenated without separator");
+    ok(-e "$logdir/SIGNALduino-Flash.log", "log file is written inside the configured logdir");
+    is($ret, U(), "flash reports no error");
+
+    $mock_main->clear_sub_tracking;
+    $mock_main->restore('AttrVal');
+  };
+
   subtest 'with installed avrdude (nano328) and logfile written' => sub {
     plan(5);
 
