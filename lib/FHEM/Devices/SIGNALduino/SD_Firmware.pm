@@ -11,6 +11,8 @@ use IPC::Open3;
 
 our $VERSION = "0.01";
 our @EXPORT_OK = qw(
+  SIGNALduino_flashLogName
+  SIGNALduino_flashLogFile
   SIGNALduino_avrdude
   SIGNALduino_PrepareFlash
   SIGNALduino_Set_flash
@@ -21,6 +23,26 @@ our @EXPORT_OK = qw(
 );
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
+
+############################# package main
+## Bare name of the flash log, used for the FileLog_logWrapper URL behind the
+## "Last Flashlog" menu entry.
+sub SIGNALduino_flashLogName {
+  my $hash = shift;
+
+  return "$hash->{TYPE}-Flash.log";
+}
+
+############################# package main
+## Full path of the flash log. avrdude writes it and SIGNALduino_FW_Detail decides
+## by it whether to offer the menu entry, so both have to derive it the same way.
+## catfile inserts exactly one separator: "logdir" may or may not carry one, and
+## plain concatenation turned "/var/log/fhem" into "/var/log/fhemSIGNALduino-Flash.log".
+sub SIGNALduino_flashLogFile {
+  my $hash = shift;
+
+  return File::Spec->catfile(main::AttrVal('global', 'logdir', './log/'), SIGNALduino_flashLogName($hash));
+}
 
 ############################# package main
 sub SIGNALduino_avrdude {
@@ -35,9 +57,7 @@ sub SIGNALduino_avrdude {
 
   main::readingsSingleUpdate($hash,'state','FIRMWARE UPDATE running',1);
   $hash->{helper}{avrdudelogs} .= "$name closed\n";
-  # Join with catfile: "logdir" may or may not end in a separator, and plain
-  # concatenation turns "/var/log/fhem" into "/var/log/fhemSIGNALduino-Flash.log".
-  my $logFile = File::Spec->catfile(main::AttrVal('global', 'logdir', './log/'), "$hash->{TYPE}-Flash.log");
+  my $logFile = SIGNALduino_flashLogFile($hash);
 
   if (-e $logFile) {
     unlink $logFile;

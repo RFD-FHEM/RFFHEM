@@ -73,6 +73,31 @@ my $mock_open3 = Test2::Mock->new(
 # --- Test execution ---
 $targetHash->{TYPE} = "SIGNALduino";
 
+# Both the writer here and the "Last Flashlog" menu entry in SIGNALduino_FW_Detail
+# derive the log path from these two helpers, so they cannot drift apart again.
+subtest 'flash log path helpers' => sub {
+  plan(4);
+
+  is(FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_flashLogName($targetHash),
+     'SIGNALduino-Flash.log', 'log name is derived from the device type');
+
+  # the default AttrVal mock returns '/tmp/', i.e. with a trailing separator
+  is(FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_flashLogFile($targetHash),
+     '/tmp/SIGNALduino-Flash.log', 'path is built when logdir carries a separator');
+
+  $mock_main->override('AttrVal' => sub {
+      my ($name, $attr, $default) = @_;
+      if($attr eq 'logdir') {      return '/var/log/fhem';    }
+      return $default;
+  });
+
+  is(FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_flashLogFile($targetHash),
+     '/var/log/fhem/SIGNALduino-Flash.log', 'separator is inserted when logdir has none');
+  unlike(FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_flashLogFile($targetHash),
+     qr{fhemSIGNALduino}, 'parts are not concatenated without a separator');
+
+  $mock_main->restore('AttrVal');
+};
 
 subtest 'avrdude tests' => sub {
 
