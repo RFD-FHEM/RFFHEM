@@ -14,6 +14,7 @@ package main;
 use strict;
 use warnings;
 use Storable qw(dclone); 
+use File::Spec;
 use FHEM::Core::Utils::Math;
 #use version 0.77; our $VERSION = version->declare('v4.0.1');
 
@@ -2485,7 +2486,7 @@ sub SIGNALduino_FW_Detail {
 
   if (!defined($lfn)) {
     $ret .= "<td>No device of TYPE=FileLog found</td>" 
-  } elsif (! -s AttrVal('global', 'logdir', './log/'). $fn) {
+  } elsif (! -s File::Spec->catfile(AttrVal('global', 'logdir', './log/'), $fn)) {   # same join as in SD_Firmware, so the menu entry matches where the log is written
     $ret .= "<td></td>";
   } else {
     my $flashlogurl="$fw_me/FileLog_logWrapper?dev=$lfn&type=text&file=$fn";
