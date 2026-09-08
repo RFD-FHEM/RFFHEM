@@ -269,7 +269,20 @@ sub SIGNALduino_ParseHttpResponse {
         $hash->{logMethod}->($name, 5, "$name: ParseHttpResponse, Header = ".$param->{httpheader});
 
         $filename = 'FHEM/firmware/' . $filename;
-        open(my $file, '>', $filename) or die $!;
+
+        # This sub runs as a HttpUtils callback and nothing there catches a die(),
+        # so a failed write has to abort the flash only, never the whole instance.
+        my $file;
+        if (!open($file, '>', $filename))
+        {
+          my $error = $!;
+          $hash->{logMethod}->($name, 1, "$name: ParseHttpResponse, cannot write firmware file $filename: $error");
+          if (defined $main::FW_wname)
+          {
+            main::FW_directNotify("FILTER=$name", "#FHEMWEB:$main::FW_wname", "FW_okDialog('<u>ERROR:</u><br>Could not write firmware file $filename:<br>$error')", '');
+          }
+          return;
+        }
         print $file $data;
         close $file;
 
