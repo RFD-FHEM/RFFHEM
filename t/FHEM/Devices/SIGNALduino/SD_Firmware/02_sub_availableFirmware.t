@@ -361,6 +361,67 @@ subtest 'ParseHttpResponse tests' => sub {
 
     like($logs[-1]{msg}, qr/undefined error while requesting .*code=404/, 'undefined error branch is logged');
   };
+
+  # ParseHttpResponse runs as a HttpUtils callback, where a die() is caught nowhere
+  # and takes the whole FHEM instance down. A write that fails must only abort the flash.
+  subtest 'unwritable target aborts the flash instead of killing FHEM' => sub {
+    plan(5);
+    reset_state();
+    my $tmpdir = tempdir(CLEANUP => 1);
+    my $oldcwd = getcwd();
+    # FHEM/firmware is deliberately NOT created, so the open() below fails.
+    chdir $tmpdir or die "cannot chdir to tempdir: $!";
+
+    my $param = {
+      hash       => $targetHash,
+      url        => 'https://example.invalid/fw.hex',
+      code       => '200',
+      command    => 'flash',
+      httpheader => 'Content-Disposition: attachment; filename="downloaded.hex"',
+      host       => 'example.invalid',
+      path       => '/releases/downloaded.hex',
+    };
+
+    my $survived = lives {
+      FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_ParseHttpResponse($param, '', "HEXDATA\n");
+    };
+    my $died_with = $@;
+    chdir $oldcwd or die "cannot restore cwd: $!";
+
+    ok($survived, 'ParseHttpResponse returns instead of dying') or diag("died with: $died_with");
+    like($logs[-1]{msg}, qr/cannot write firmware file/, 'write failure is logged');
+    is($logs[-1]{level}, 1, 'write failure is logged as an error');
+    is(scalar(@{$mock_main->sub_tracking->{SIGNALduino_Set} // []}), 0, 'flash is not started');
+    ok(!-e "$tmpdir/FHEM/firmware/downloaded.hex", 'no firmware file is left behind');
+  };
+
+  subtest 'write failure informs the frontend when FW_wname is set' => sub {
+    plan(2);
+    reset_state();
+    my $tmpdir = tempdir(CLEANUP => 1);
+    my $oldcwd = getcwd();
+    chdir $tmpdir or die "cannot chdir to tempdir: $!";
+
+    my $param = {
+      hash       => $targetHash,
+      url        => 'https://example.invalid/fw.hex',
+      code       => '200',
+      command    => 'flash',
+      httpheader => 'Content-Disposition: attachment; filename="downloaded.hex"',
+      host       => 'example.invalid',
+      path       => '/releases/downloaded.hex',
+    };
+
+    {
+      local $main::FW_wname = 'testweb';
+      FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_ParseHttpResponse($param, '', "HEXDATA\n");
+    }
+    chdir $oldcwd or die "cannot restore cwd: $!";
+
+    my $notify_calls = $mock_main->sub_tracking->{FW_directNotify} // [];
+    is(scalar(@{$notify_calls}), 1, 'FW_directNotify called once');
+    like($notify_calls->[0]{args}[2], qr/Could not write firmware file/, 'dialog names the write failure');
+  };
 };
 
 subtest 'githubParseHttpResponse tests' => sub {
