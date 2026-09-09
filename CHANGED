@@ -1,3 +1,6 @@
+2026-09-07 - Merge pull request #1347 from RFD-FHEM/feat/reconstruct_flash
+
+Draft: reconstruct flash subs and commands
 2026-08-07 - Internal variable STATE should not be set in Define. (#1390)
 
 * Update 14_SD_BELL.pm
