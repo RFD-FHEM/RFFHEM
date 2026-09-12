@@ -45,6 +45,19 @@ sub SIGNALduino_flashLogFile {
 }
 
 ############################# package main
+## Runs the flash command and returns its exit status. Everything the call needs -
+## the shell (the nano command chains two attempts with ||) and the default SIGCHLD
+## handling - is kept together here, separate from the evaluation of the result.
+sub _run_avrdude {
+  my $cmd = shift;
+
+  local $SIG{CHLD} = 'DEFAULT';
+  qx($cmd);
+
+  return $?;
+}
+
+############################# package main
 sub SIGNALduino_avrdude {
   my $name = shift;
   my $hash = $main::defs{$name};
@@ -64,15 +77,14 @@ sub SIGNALduino_avrdude {
   }
 
   $hash->{helper}{avrdudecmd} =~ s/\Q[LOGFILE]\E/$logFile/g;
-  local $SIG{CHLD} = 'DEFAULT';
   delete($hash->{FLASH_RESULT}) if (exists($hash->{FLASH_RESULT}));
 
-  qx($hash->{helper}{avrdudecmd});
+  my $exitStatus = _run_avrdude($hash->{helper}{avrdudecmd});
 
-  if ($? != 0 )
+  if ($exitStatus != 0 )
   {
     main::readingsSingleUpdate($hash,'state','FIRMWARE UPDATE with error',1);    # processed in tests
-    $hash->{logMethod}->($name ,3, "$name: avrdude, ERROR: avrdude exited with error $?");
+    $hash->{logMethod}->($name ,3, "$name: avrdude, ERROR: avrdude exited with error $exitStatus");
     if (defined $main::FW_wname)
     {
       main::FW_directNotify("FILTER=$name", "FHEMWEB:$main::FW_wname", "FW_okDialog('ERROR: avrdude exited with error, for details see last flashlog.')", '');

@@ -116,6 +116,17 @@ subtest 'avrdude port notation' => sub {
   }
 };
 
+# _run_avrdude is the piece that later moves into a BlockingCall child, so it only
+# runs the command and reports the status - the evaluation stays with the caller.
+subtest 'avrdude invocation' => sub {
+  plan(2);
+
+  is(FHEM::Devices::SIGNALduino::SD_Firmware::_run_avrdude(q[perl -e '{ exit(0); }']),
+     0, 'a successful command reports 0');
+  isnt(FHEM::Devices::SIGNALduino::SD_Firmware::_run_avrdude(q[perl -e '{ exit(3); }']),
+     0, 'a failing command reports a non zero status');
+};
+
 subtest 'avrdude tests' => sub {
 
   subtest 'without installed avrdude and without logfile placeholder' => sub {
