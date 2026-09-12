@@ -1,3 +1,6 @@
+2026-09-12 - Merge pull request #1395 from RFD-FHEM/fix/flash-logfile-path
+
+fix: Pfad des Flashlogs bei logdir ohne abschließenden Trenner
 2026-09-07 - Merge pull request #1347 from RFD-FHEM/feat/reconstruct_flash
 
 Draft: reconstruct flash subs and commands
