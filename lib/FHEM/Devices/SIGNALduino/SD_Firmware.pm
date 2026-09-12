@@ -102,6 +102,26 @@ sub SIGNALduino_avrdude {
 }
 
 ############################# package main
+## Resolves the port avrdude has to talk to.
+## A device reached over the network - ser2net and the like - needs avrdude's
+## "net:host:port" notation, which DeviceName does not carry. The optional
+## "flashDevice" attribute covers setups where the bootloader answers under a
+## different address than normal operation; left unset, DeviceName is used.
+## Local device files are passed through untouched.
+sub _resolve_flash_port {
+  my $hash = shift;
+
+  my $dev = main::AttrVal($hash->{NAME}, 'flashDevice', q{});
+  $dev = $hash->{DeviceName} if $dev eq q{};
+  ($dev) = split m{@}xms, $dev;                        # strip a trailing @baudrate
+
+  return $dev if $dev =~ m{\A net: }xms;               # already spelled out
+  return "net:$dev" if $dev =~ m{\A [^:\s/\\]+ : \d+ \z}xms;   # host:port
+
+  return $dev;
+}
+
+############################# package main
 sub SIGNALduino_PrepareFlash {
   my ($hash,$hexFile) = @_;
 
@@ -109,7 +129,7 @@ sub SIGNALduino_PrepareFlash {
 
   my $name=$hash->{NAME};
   my $hardware=main::AttrVal($name,'hardware','');
-  my ($port,undef) = split('@', $hash->{DeviceName});
+  my $port = _resolve_flash_port($hash);
   my $baudrate= 57600;
   my $log = '';
   my $avrdudefound=0;
@@ -147,7 +167,13 @@ sub SIGNALduino_PrepareFlash {
   }
 
   main::DevIo_CloseDev($hash);
-  if ($hardware eq 'radinoCC1101' && $^O eq 'linux') {
+  if ($hardware eq 'radinoCC1101' && $^O eq 'linux' && $port =~ m{\A net: }xms) {
+    # stty needs a device file, and the usb id rewrite below has no meaning for a
+    # network address. With ser2net the reset comes from reopening the serial port
+    # on the server side anyway.
+    $hash->{logMethod}->($name, 3, "$name: PrepareFlash, skipping stty reset for $hardware, $port is a network device");
+  }
+  elsif ($hardware eq 'radinoCC1101' && $^O eq 'linux') {
     $hash->{logMethod}->($name, 3, "$name: PrepareFlash, forcing special reset for $hardware on $port");
     # Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
 

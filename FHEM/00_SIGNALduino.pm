@@ -162,6 +162,7 @@ sub SIGNALduino_Initialize {
             .' doubleMsgCheck_IDs'
             .' eventlogging:0,1'
             .' flashCommand'
+            .' flashDevice'
             .' hardware:esp32s,esp32cc1101,esp8266s,esp8266cc1101,MAPLEMINI_F103CBs,MAPLEMINI_F103CBcc1101,nano328,nanoCC1101,miniculCC1101,promini8cc1101,promini16cc1101,promini8s,promini16s,radinoCC1101'
             .' hexFile'
             .' initCommands'
@@ -3497,7 +3498,10 @@ USB-connected devices (SIGNALduino):<br>
         is the speed (e.g. 57600)
       </li>
       <li>[PORT]<br>
-        is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition
+        is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition.<br>
+        A device connected over the network (e.g. via ser2net) is handed to avrdude in its <code>net:host:port</code>
+        notation. If the bootloader answers under a different address than the one used for normal operation, set the
+        <a href="#SIGNALDuino_flashDevice">flashDevice</a> attribute.
       </li>
       <li>[HEXFILE]<br>
         is the .hex file that shall get flashed. There are three options (applied in this order):<br>
@@ -3510,6 +3514,19 @@ USB-connected devices (SIGNALduino):<br>
       </li>
     </ul><br>
     <u><i>note:</u></i> ! Sometimes there can be problems flashing radino on Linux. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Here in the wiki under the point "radino & Linux" is a patch!</a>
+  </li><br>
+  <a name="SIGNALDuino_flashDevice"></a>
+  <li>flashDevice<br>
+    Address of the bootloader, used for [PORT] instead of the one from the definition. Leave it unset unless the
+    bootloader answers somewhere else than the device used for normal operation - a dedicated ser2net port, for example.<br>
+    A <code>host:port</code> value is handed to avrdude as <code>net:host:port</code>, a device file is passed through unchanged.<br>
+    <ul>
+      <li>example for a dedicated flash port: <code>attr sduino flashDevice raspi:45022</code></li>
+    </ul>
+    <u><i>note:</u></i> avrdude cannot toggle DTR over a network connection, so the reset has to come from the server
+    reopening the serial port when avrdude connects. With ser2net this needs a raw <code>tcp</code> accepter - a
+    <code>telnet(rfc2217)</code> one garbles the STK500 protocol - and the port must not be held by anything else at
+    that moment, which <code>set flash</code> takes care of by closing the connection first.
   </li><br>
   <a name="SIGNALDuino_hardware"></a>
   <li>hardware<br>
@@ -4105,7 +4122,10 @@ USB-connected devices (SIGNALduino):<br>
         Ist die Schrittgeschwindigkeit. (z.Bsp: 57600)
       </li>
       <li>[PORT]<br>
-        Ist der Port, an dem der SIGNALduino angeschlossen ist (z.Bsp: /dev/ttyUSB0) und wird von der Definition verwendet.
+        Ist der Port, an dem der SIGNALduino angeschlossen ist (z.Bsp: /dev/ttyUSB0) und wird von der Definition verwendet.<br>
+        Ein &uuml;ber das Netzwerk angebundenes Ger&auml;t (z.Bsp: via ser2net) wird an avrdude in dessen Schreibweise
+        <code>net:host:port</code> &uuml;bergeben. Antwortet der Bootloader unter einer anderen Adresse als der f&uuml;r den
+        normalen Betrieb genutzten, ist das Attribut <a href="#SIGNALDuino_flashDevice">flashDevice</a> zu setzen.
       </li>
       <li>[HEXFILE]<br>
         Ist die .hex-Datei, die geflasht werden soll. Es gibt drei Optionen (angewendet in dieser Reihenfolge):<br>
@@ -4120,6 +4140,22 @@ USB-connected devices (SIGNALduino):<br>
       </li>
     </ul><br>
     <u><i>Hinweis:</u></i> ! Teilweise kann es beim Flashen vom radino unter Linux Probleme geben. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Hier im Wiki unter dem Punkt "radino & Linux" gibt es einen Patch!</a>
+  </li><br>
+  <a name="SIGNALDuino_flashDevice"></a>
+  <li>flashDevice<br>
+    Adresse des Bootloaders, die anstelle der Adresse aus der Definition f&uuml;r [PORT] verwendet wird. Das Attribut
+    bleibt ungesetzt, solange der Bootloader unter derselben Adresse antwortet wie das Ger&auml;t im normalen Betrieb.
+    Zu setzen ist es zum Beispiel bei einem eigenen ser2net-Port zum Flashen.<br>
+    Ein Wert der Form <code>host:port</code> wird an avrdude als <code>net:host:port</code> &uuml;bergeben, eine
+    Ger&auml;tedatei bleibt unver&auml;ndert.<br>
+    <ul>
+      <li>Beispiel f&uuml;r einen eigenen Flash-Port: <code>attr sduino flashDevice raspi:45022</code></li>
+    </ul>
+    <u><i>Hinweis:</u></i> avrdude kann &uuml;ber eine Netzwerkverbindung kein DTR schalten. Der Reset muss daher daraus
+    entstehen, dass die Gegenstelle die serielle Schnittstelle beim Verbindungsaufbau neu &ouml;ffnet. Bei ser2net
+    erfordert das einen rohen <code>tcp</code>-Accepter &mdash; ein <code>telnet(rfc2217)</code>-Accepter verf&auml;lscht
+    das STK500-Protokoll &mdash; und die Schnittstelle darf in diesem Moment von niemandem gehalten werden, worum sich
+    <code>set flash</code> durch das vorherige Schlie&szlig;en der Verbindung k&uuml;mmert.
   </li><br>
   <a name="SIGNALDuino_hardware"></a>
   <li>hardware<br>
