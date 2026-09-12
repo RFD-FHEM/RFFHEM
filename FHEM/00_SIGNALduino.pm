@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 0 2026-09-06 20:27:57Z sidey79 $
+# $Id: 00_SIGNALduino.pm 0 2026-09-09 20:31:20Z sidey79 $
 # https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -26,7 +26,7 @@ no warnings 'portable';
 
 eval {use Data::Dumper qw(Dumper);1};
 use constant {
-  SDUINO_VERSION                  => '4.0.1+20260906',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '4.0.1+20260909',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -2475,7 +2475,7 @@ sub SIGNALduino_FW_Detail {
     my $d = (devspec2array('TYPE=FileLog'))[0]; 
     IsDevice($d) ? $d : undef 
   };
-  my $fn=$defs{$name}->{TYPE}."-Flash.log";
+  my $fn=SIGNALduino_flashLogName($hash);
   my $fw_me = defined($FW_ME) ? $FW_ME : q{};
   my $fw_detail = defined($FW_detail) ? $FW_detail : q{};
 
@@ -2485,7 +2485,7 @@ sub SIGNALduino_FW_Detail {
 
   if (!defined($lfn)) {
     $ret .= "<td>No device of TYPE=FileLog found</td>" 
-  } elsif (! -s AttrVal('global', 'logdir', './log/'). $fn) {
+  } elsif (! -s SIGNALduino_flashLogFile($hash)) {
     $ret .= "<td></td>";
   } else {
     my $flashlogurl="$fw_me/FileLog_logWrapper?dev=$lfn&type=text&file=$fn";
