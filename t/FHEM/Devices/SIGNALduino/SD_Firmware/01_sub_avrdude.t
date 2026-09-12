@@ -99,6 +99,34 @@ subtest 'flash log path helpers' => sub {
   $mock_main->restore('AttrVal');
 };
 
+# _resolve_flash_target picks the address, _avrdude_port only spells it out. They are
+# kept apart so another transport can reuse the address without avrdude's notation.
+subtest 'avrdude port notation' => sub {
+  my %expected = (
+    'raspi:45020'     => 'net:raspi:45020',   # network address gets the prefix
+    'net:raspi:45022' => 'net:raspi:45022',   # already spelled out, left alone
+    '/dev/ttyUSB0'    => '/dev/ttyUSB0',      # device file passed through
+    'COM3'            => 'COM3',
+  );
+  plan(scalar keys %expected);
+
+  for my $address (sort keys %expected) {
+    is(FHEM::Devices::SIGNALduino::SD_Firmware::_avrdude_port($address),
+       $expected{$address}, "$address -> $expected{$address}");
+  }
+};
+
+# _run_avrdude is the piece that later moves into a BlockingCall child, so it only
+# runs the command and reports the status - the evaluation stays with the caller.
+subtest 'avrdude invocation' => sub {
+  plan(2);
+
+  is(FHEM::Devices::SIGNALduino::SD_Firmware::_run_avrdude(q[perl -e '{ exit(0); }']),
+     0, 'a successful command reports 0');
+  isnt(FHEM::Devices::SIGNALduino::SD_Firmware::_run_avrdude(q[perl -e '{ exit(3); }']),
+     0, 'a failing command reports a non zero status');
+};
+
 subtest 'avrdude tests' => sub {
 
   subtest 'without installed avrdude and without logfile placeholder' => sub {
@@ -371,6 +399,109 @@ subtest 'PrepareFlash tests' => sub {
       # Expected command: Port is /dev/ttyACM0, Baudrate is 57600
       like($targetHash->{helper}{avrdudecmd}, qr{-P /dev/ttyACM0}, "avrdudecmd uses only port part ");
       like($targetHash->{helper}{avrdudecmd}, qr{-b 57600}, "avrdudecmd uses default baudrate");
+  };
+
+  # A device reached over the network needs avrdude's net: notation, which the
+  # definition does not carry.
+  subtest 'PrepareFlash 8: TCP DeviceName is handed to avrdude as net:host:port' => sub {
+      plan(2);
+      local $^O = 'linux';
+      setup_prepare_flash_test();
+      local $ENV{PATH} = build_mock_path($^O);
+      $targetHash->{DeviceName} = 'raspi:45020';
+
+      my $ret = FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_PrepareFlash($targetHash,'my.hex');
+
+      is($ret, undef, "Return value is undef (Success)");
+      like($targetHash->{helper}{avrdudecmd}, qr{-P net:raspi:45020\b}, "avrdudecmd uses net: notation");
+  };
+
+  subtest 'PrepareFlash 9: flashDevice overrides the address from the definition' => sub {
+      plan(3);
+      local $^O = 'linux';
+      setup_prepare_flash_test();
+      local $ENV{PATH} = build_mock_path($^O);
+      $targetHash->{DeviceName} = 'raspi:45020';       # operational port
+      $mock_main->override('AttrVal' => sub {
+          my ($name, $attr, $default) = @_;
+          if($attr eq 'logdir') {      return '/tmp/';    }
+          if($attr eq 'flashDevice') { return 'raspi:45022' }   # dedicated flash port
+          return $default;
+      });
+
+      my $ret = FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_PrepareFlash($targetHash,'my.hex');
+
+      is($ret, undef, "Return value is undef (Success)");
+      like($targetHash->{helper}{avrdudecmd}, qr{-P net:raspi:45022\b}, "avrdudecmd uses the flashDevice address");
+      unlike($targetHash->{helper}{avrdudecmd}, qr{45020}, "address from the definition is not used");
+
+      $mock_main->restore('AttrVal');
+  };
+
+  subtest 'PrepareFlash 10: flashDevice already spelled out with net: is left alone' => sub {
+      plan(2);
+      local $^O = 'linux';
+      setup_prepare_flash_test();
+      local $ENV{PATH} = build_mock_path($^O);
+      $targetHash->{DeviceName} = 'raspi:45020';
+      $mock_main->override('AttrVal' => sub {
+          my ($name, $attr, $default) = @_;
+          if($attr eq 'logdir') {      return '/tmp/';    }
+          if($attr eq 'flashDevice') { return 'net:raspi:45022' }
+          return $default;
+      });
+
+      my $ret = FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_PrepareFlash($targetHash,'my.hex');
+
+      is($ret, undef, "Return value is undef (Success)");
+      like($targetHash->{helper}{avrdudecmd}, qr{-P net:raspi:45022\b}, "no second net: prefix is added");
+
+      $mock_main->restore('AttrVal');
+  };
+
+  subtest 'PrepareFlash 11: flashDevice may point at a local device file' => sub {
+      plan(2);
+      local $^O = 'linux';
+      setup_prepare_flash_test();
+      local $ENV{PATH} = build_mock_path($^O);
+      $targetHash->{DeviceName} = 'raspi:45020';
+      $mock_main->override('AttrVal' => sub {
+          my ($name, $attr, $default) = @_;
+          if($attr eq 'logdir') {      return '/tmp/';    }
+          if($attr eq 'flashDevice') { return '/dev/ttyUSB1' }
+          return $default;
+      });
+
+      my $ret = FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_PrepareFlash($targetHash,'my.hex');
+
+      is($ret, undef, "Return value is undef (Success)");
+      like($targetHash->{helper}{avrdudecmd}, qr{-P /dev/ttyUSB1\b}, "device file is passed through unchanged");
+
+      $mock_main->restore('AttrVal');
+  };
+
+  subtest 'PrepareFlash 12: radino over TCP skips the stty reset' => sub {
+      plan(3);
+      local $^O = 'linux';
+      setup_prepare_flash_test();
+      local $ENV{PATH} = build_mock_path($^O);
+      $targetHash->{DeviceName} = 'raspi:45020';
+      $mock_main->override('AttrVal' => sub {
+          my ($name, $attr, $default) = @_;
+          if($attr eq 'logdir') {   return '/tmp/';    }
+          if($attr eq 'hardware') { return 'radinoCC1101' }
+          return $default;
+      });
+      $mock_open3->clear_sub_tracking;
+
+      my $ret = FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_PrepareFlash($targetHash,'my.hex');
+
+      is($ret, undef, "Return value is undef (Success)");
+      is(scalar @{$mock_open3->sub_tracking()->{open3} // []}, 0, "stty is not called for a network device");
+      like($targetHash->{helper}{avrdudecmd}, qr{-P net:raspi:45020\b}, "avrdudecmd uses net: notation");
+
+      $mock_open3->clear_sub_tracking;
+      $mock_main->restore('AttrVal');
   };
 
 };

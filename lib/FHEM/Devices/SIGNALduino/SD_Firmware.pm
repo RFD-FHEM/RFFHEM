@@ -45,6 +45,19 @@ sub SIGNALduino_flashLogFile {
 }
 
 ############################# package main
+## Runs the flash command and returns its exit status. Everything the call needs -
+## the shell (the nano command chains two attempts with ||) and the default SIGCHLD
+## handling - is kept together here, separate from the evaluation of the result.
+sub _run_avrdude {
+  my $cmd = shift;
+
+  local $SIG{CHLD} = 'DEFAULT';
+  qx($cmd);
+
+  return $?;
+}
+
+############################# package main
 sub SIGNALduino_avrdude {
   my $name = shift;
   my $hash = $main::defs{$name};
@@ -64,15 +77,14 @@ sub SIGNALduino_avrdude {
   }
 
   $hash->{helper}{avrdudecmd} =~ s/\Q[LOGFILE]\E/$logFile/g;
-  local $SIG{CHLD} = 'DEFAULT';
   delete($hash->{FLASH_RESULT}) if (exists($hash->{FLASH_RESULT}));
 
-  qx($hash->{helper}{avrdudecmd});
+  my $exitStatus = _run_avrdude($hash->{helper}{avrdudecmd});
 
-  if ($? != 0 )
+  if ($exitStatus != 0 )
   {
     main::readingsSingleUpdate($hash,'state','FIRMWARE UPDATE with error',1);    # processed in tests
-    $hash->{logMethod}->($name ,3, "$name: avrdude, ERROR: avrdude exited with error $?");
+    $hash->{logMethod}->($name ,3, "$name: avrdude, ERROR: avrdude exited with error $exitStatus");
     if (defined $main::FW_wname)
     {
       main::FW_directNotify("FILTER=$name", "FHEMWEB:$main::FW_wname", "FW_okDialog('ERROR: avrdude exited with error, for details see last flashlog.')", '');
@@ -102,6 +114,33 @@ sub SIGNALduino_avrdude {
 }
 
 ############################# package main
+## Where the firmware has to go: the "flashDevice" attribute when set, the address
+## from the definition otherwise. Deliberately transport-neutral - avrdude spells a
+## network address differently than, say, an OTA upload would, so the formatting is
+## left to the caller.
+sub _resolve_flash_target {
+  my $hash = shift;
+
+  my $dev = main::AttrVal($hash->{NAME}, 'flashDevice', q{});
+  $dev = $hash->{DeviceName} if $dev eq q{};
+  ($dev) = split m{@}xms, $dev;                        # strip a trailing @baudrate
+
+  return $dev;
+}
+
+############################# package main
+## The same address in avrdude's notation: a network address gets the "net:" prefix
+## it needs, a device file is passed through untouched.
+sub _avrdude_port {
+  my $dev = shift;
+
+  return $dev if $dev =~ m{\A net: }xms;               # already spelled out
+  return "net:$dev" if $dev =~ m{\A [^:\s/\\]+ : \d+ \z}xms;   # host:port
+
+  return $dev;
+}
+
+############################# package main
 sub SIGNALduino_PrepareFlash {
   my ($hash,$hexFile) = @_;
 
@@ -109,7 +148,7 @@ sub SIGNALduino_PrepareFlash {
 
   my $name=$hash->{NAME};
   my $hardware=main::AttrVal($name,'hardware','');
-  my ($port,undef) = split('@', $hash->{DeviceName});
+  my $port = _avrdude_port(_resolve_flash_target($hash));
   my $baudrate= 57600;
   my $log = '';
   my $avrdudefound=0;
@@ -147,7 +186,13 @@ sub SIGNALduino_PrepareFlash {
   }
 
   main::DevIo_CloseDev($hash);
-  if ($hardware eq 'radinoCC1101' && $^O eq 'linux') {
+  if ($hardware eq 'radinoCC1101' && $^O eq 'linux' && $port =~ m{\A net: }xms) {
+    # stty needs a device file, and the usb id rewrite below has no meaning for a
+    # network address. With ser2net the reset comes from reopening the serial port
+    # on the server side anyway.
+    $hash->{logMethod}->($name, 3, "$name: PrepareFlash, skipping stty reset for $hardware, $port is a network device");
+  }
+  elsif ($hardware eq 'radinoCC1101' && $^O eq 'linux') {
     $hash->{logMethod}->($name, 3, "$name: PrepareFlash, forcing special reset for $hardware on $port");
     # Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
 
