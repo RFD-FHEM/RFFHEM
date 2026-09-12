@@ -102,18 +102,25 @@ sub SIGNALduino_avrdude {
 }
 
 ############################# package main
-## Resolves the port avrdude has to talk to.
-## A device reached over the network - ser2net and the like - needs avrdude's
-## "net:host:port" notation, which DeviceName does not carry. The optional
-## "flashDevice" attribute covers setups where the bootloader answers under a
-## different address than normal operation; left unset, DeviceName is used.
-## Local device files are passed through untouched.
-sub _resolve_flash_port {
+## Where the firmware has to go: the "flashDevice" attribute when set, the address
+## from the definition otherwise. Deliberately transport-neutral - avrdude spells a
+## network address differently than, say, an OTA upload would, so the formatting is
+## left to the caller.
+sub _resolve_flash_target {
   my $hash = shift;
 
   my $dev = main::AttrVal($hash->{NAME}, 'flashDevice', q{});
   $dev = $hash->{DeviceName} if $dev eq q{};
   ($dev) = split m{@}xms, $dev;                        # strip a trailing @baudrate
+
+  return $dev;
+}
+
+############################# package main
+## The same address in avrdude's notation: a network address gets the "net:" prefix
+## it needs, a device file is passed through untouched.
+sub _avrdude_port {
+  my $dev = shift;
 
   return $dev if $dev =~ m{\A net: }xms;               # already spelled out
   return "net:$dev" if $dev =~ m{\A [^:\s/\\]+ : \d+ \z}xms;   # host:port
@@ -129,7 +136,7 @@ sub SIGNALduino_PrepareFlash {
 
   my $name=$hash->{NAME};
   my $hardware=main::AttrVal($name,'hardware','');
-  my $port = _resolve_flash_port($hash);
+  my $port = _avrdude_port(_resolve_flash_target($hash));
   my $baudrate= 57600;
   my $log = '';
   my $avrdudefound=0;

@@ -99,6 +99,23 @@ subtest 'flash log path helpers' => sub {
   $mock_main->restore('AttrVal');
 };
 
+# _resolve_flash_target picks the address, _avrdude_port only spells it out. They are
+# kept apart so another transport can reuse the address without avrdude's notation.
+subtest 'avrdude port notation' => sub {
+  my %expected = (
+    'raspi:45020'     => 'net:raspi:45020',   # network address gets the prefix
+    'net:raspi:45022' => 'net:raspi:45022',   # already spelled out, left alone
+    '/dev/ttyUSB0'    => '/dev/ttyUSB0',      # device file passed through
+    'COM3'            => 'COM3',
+  );
+  plan(scalar keys %expected);
+
+  for my $address (sort keys %expected) {
+    is(FHEM::Devices::SIGNALduino::SD_Firmware::_avrdude_port($address),
+       $expected{$address}, "$address -> $expected{$address}");
+  }
+};
+
 subtest 'avrdude tests' => sub {
 
   subtest 'without installed avrdude and without logfile placeholder' => sub {
