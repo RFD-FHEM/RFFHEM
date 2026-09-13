@@ -151,7 +151,11 @@ sub SIGNALduino_PrepareFlash {
     $hash->{logMethod}->($name, 3, "$name: PrepareFlash, forcing special reset for $hardware on $port");
     # Mit dem Linux-Kommando 'stty' die Port-Einstellungen setzen
 
-    my($chld_out, $chld_in, $chld_err);
+    my($chld_out, $chld_in);
+    # open3 only creates a handle of its own for stdin and stdout. An undefined
+    # third argument means "send stderr to stdout", and $chld_err stays undef -
+    # reading from it then warns instead of collecting stty's error output.
+    my $chld_err = gensym;
     my $pid;
     eval {
       $pid = IPC::Open3::open3($chld_in,$chld_out, $chld_err,  "stty -F $port ospeed 1200 ispeed 1200");
