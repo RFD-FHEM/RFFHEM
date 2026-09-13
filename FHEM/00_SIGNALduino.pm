@@ -3499,9 +3499,8 @@ USB-connected devices (SIGNALduino):<br>
       </li>
       <li>[PORT]<br>
         is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition.<br>
-        A device connected over the network (e.g. via ser2net) is handed to avrdude in its <code>net:host:port</code>
-        notation. If the bootloader answers under a different address than the one used for normal operation, set the
-        <a href="#SIGNALDuino_flashDevice">flashDevice</a> attribute.
+        A device connected over the network (e.g. via ser2net) is passed on to avrdude automatically, no configuration
+        needed. Only if flashing requires a different address, see <a href="#SIGNALDuino_flashDevice">flashDevice</a>.
       </li>
       <li>[HEXFILE]<br>
         is the .hex file that shall get flashed. There are three options (applied in this order):<br>
@@ -3517,16 +3516,13 @@ USB-connected devices (SIGNALduino):<br>
   </li><br>
   <a name="SIGNALDuino_flashDevice"></a>
   <li>flashDevice<br>
-    Address of the bootloader, used for [PORT] instead of the one from the definition. Leave it unset unless the
-    bootloader answers somewhere else than the device used for normal operation - a dedicated ser2net port, for example.<br>
-    A <code>host:port</code> value is handed to avrdude as <code>net:host:port</code>, a device file is passed through unchanged.<br>
+    Normally not needed. Only set this if the SIGNALduino is reachable under a different address for flashing than
+    during normal operation - through a ser2net port of its own, for example.<br>
     <ul>
-      <li>example for a dedicated flash port: <code>attr sduino flashDevice raspi:45022</code></li>
+      <li><code>attr sduino flashDevice raspi:45022</code></li>
     </ul>
-    <u><i>note:</u></i> avrdude cannot toggle DTR over a network connection, so the reset has to come from the server
-    reopening the serial port when avrdude connects. With ser2net this needs a raw <code>tcp</code> accepter - a
-    <code>telnet(rfc2217)</code> one garbles the STK500 protocol - and the port must not be held by anything else at
-    that moment, which <code>set flash</code> takes care of by closing the connection first.
+    With ser2net such a port has to be a plain TCP connection: <code>accepter: tcp,45022</code>. Using
+    <code>telnet(rfc2217)</code> instead makes flashing fail - avrdude then reports <code>not in sync</code> or hangs.
   </li><br>
   <a name="SIGNALDuino_hardware"></a>
   <li>hardware<br>
@@ -4123,9 +4119,9 @@ USB-connected devices (SIGNALduino):<br>
       </li>
       <li>[PORT]<br>
         Ist der Port, an dem der SIGNALduino angeschlossen ist (z.Bsp: /dev/ttyUSB0) und wird von der Definition verwendet.<br>
-        Ein &uuml;ber das Netzwerk angebundenes Ger&auml;t (z.Bsp: via ser2net) wird an avrdude in dessen Schreibweise
-        <code>net:host:port</code> &uuml;bergeben. Antwortet der Bootloader unter einer anderen Adresse als der f&uuml;r den
-        normalen Betrieb genutzten, ist das Attribut <a href="#SIGNALDuino_flashDevice">flashDevice</a> zu setzen.
+        Ein &uuml;ber das Netzwerk angebundenes Ger&auml;t (z.Bsp: via ser2net) wird automatisch an avrdude
+        weitergereicht, daf&uuml;r ist nichts einzurichten. Nur wenn zum Flashen eine andere Adresse n&ouml;tig ist,
+        siehe <a href="#SIGNALDuino_flashDevice">flashDevice</a>.
       </li>
       <li>[HEXFILE]<br>
         Ist die .hex-Datei, die geflasht werden soll. Es gibt drei Optionen (angewendet in dieser Reihenfolge):<br>
@@ -4143,19 +4139,14 @@ USB-connected devices (SIGNALduino):<br>
   </li><br>
   <a name="SIGNALDuino_flashDevice"></a>
   <li>flashDevice<br>
-    Adresse des Bootloaders, die anstelle der Adresse aus der Definition f&uuml;r [PORT] verwendet wird. Das Attribut
-    bleibt ungesetzt, solange der Bootloader unter derselben Adresse antwortet wie das Ger&auml;t im normalen Betrieb.
-    Zu setzen ist es zum Beispiel bei einem eigenen ser2net-Port zum Flashen.<br>
-    Ein Wert der Form <code>host:port</code> wird an avrdude als <code>net:host:port</code> &uuml;bergeben, eine
-    Ger&auml;tedatei bleibt unver&auml;ndert.<br>
+    Wird normalerweise nicht ben&ouml;tigt. Nur setzen, wenn der SIGNALduino zum Flashen &uuml;ber eine andere Adresse
+    erreichbar ist als im normalen Betrieb &mdash; zum Beispiel &uuml;ber einen eigenen ser2net-Port.<br>
     <ul>
-      <li>Beispiel f&uuml;r einen eigenen Flash-Port: <code>attr sduino flashDevice raspi:45022</code></li>
+      <li><code>attr sduino flashDevice raspi:45022</code></li>
     </ul>
-    <u><i>Hinweis:</u></i> avrdude kann &uuml;ber eine Netzwerkverbindung kein DTR schalten. Der Reset muss daher daraus
-    entstehen, dass die Gegenstelle die serielle Schnittstelle beim Verbindungsaufbau neu &ouml;ffnet. Bei ser2net
-    erfordert das einen rohen <code>tcp</code>-Accepter &mdash; ein <code>telnet(rfc2217)</code>-Accepter verf&auml;lscht
-    das STK500-Protokoll &mdash; und die Schnittstelle darf in diesem Moment von niemandem gehalten werden, worum sich
-    <code>set flash</code> durch das vorherige Schlie&szlig;en der Verbindung k&uuml;mmert.
+    Bei ser2net muss dieser Port eine einfache TCP-Verbindung sein: <code>accepter: tcp,45022</code>. Mit
+    <code>telnet(rfc2217)</code> schl&auml;gt das Flashen fehl &mdash; avrdude meldet dann <code>not in sync</code>
+    oder bleibt h&auml;ngen.
   </li><br>
   <a name="SIGNALDuino_hardware"></a>
   <li>hardware<br>
