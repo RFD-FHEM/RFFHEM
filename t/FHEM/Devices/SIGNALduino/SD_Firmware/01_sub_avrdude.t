@@ -64,7 +64,14 @@ my $mock_open3 = Test2::Mock->new(
   class => 'IPC::Open3',
   override => [
     open3 => sub {
-        my ($wtr, $rdr, $err, @cmd) = @_;
+        # Mimic what open3 hands back: readable handles for the child's stdout and
+        # stderr. A handle for stderr only exists when the caller passed one in -
+        # with an undefined argument the real open3 merges stderr into stdout.
+        open $_[0], '>', File::Spec->devnull or die "mock open3 (stdin): $!";
+        open $_[1], '<', \"stty stdout\n" or die "mock open3 (stdout): $!";
+        if (defined $_[2]) {
+          open $_[2], '<', \"stty stderr\n" or die "mock open3 (stderr): $!";
+        }
         return 12345; # dummy pid
     },
   ],
@@ -357,7 +364,7 @@ subtest 'PrepareFlash tests' => sub {
   };
 
   subtest 'PrepareFlash 6: Radino + Linux (stty Reset, Port fix)' => sub {
-      plan(5);
+      plan(8);
       local $^O = 'linux';
       setup_prepare_flash_test();
       local $ENV{PATH} = build_mock_path($^O);
@@ -380,6 +387,11 @@ subtest 'PrepareFlash tests' => sub {
       is(scalar @{$mock_open3->sub_tracking()->{open3}}, 1, "ipc::open3 called for stty");
       #The stty command is expected to use the original DeviceName (before fixing)
       like($mock_open3->sub_tracking()->{open3}->[0]->{args}->[3], qr{stty -F /dev/serial/by-id/usb-Unknown_radinoCC1101_v3.4.0-if00 ospeed 1200 ispeed 1200}, "stty command called on original port name");
+      # open3 needs a handle of its own for stderr, otherwise it merges stderr into
+      # stdout and reading the stderr variable warns about an unopened filehandle.
+      is($mock_open3->sub_tracking()->{open3}->[0]->{args}->[2], D(), "open3 gets a handle for the childs stderr");
+      like($targetHash->{helper}{stty_output}, qr{stty stdout}, "stdout of stty is collected");
+      like($targetHash->{helper}{stty_output}, qr{stty stderr}, "stderr of stty is collected");
       is(@{$mock_main->sub_tracking()->{DevIo_CloseDev}}, 1, "check DevIo_CloseDev called");
       $mock_open3->clear_sub_tracking;
   };
