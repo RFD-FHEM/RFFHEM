@@ -1,3 +1,6 @@
+2026-09-17 - Merge pull request #1396 from RFD-FHEM/feat/flash-over-tcp
+
+feat: Flashen von Geräten, die über das Netzwerk angebunden sind
 2026-09-12 - Merge pull request #1395 from RFD-FHEM/fix/flash-logfile-path
 
 fix: Pfad des Flashlogs bei logdir ohne abschließenden Trenner
