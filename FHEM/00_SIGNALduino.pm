@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 0 2026-09-09 20:31:20Z sidey79 $
+# $Id: 00_SIGNALduino.pm 0 2026-09-16 14:47:28Z sidey79 $
 # https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -26,7 +26,7 @@ no warnings 'portable';
 
 eval {use Data::Dumper qw(Dumper);1};
 use constant {
-  SDUINO_VERSION                  => '4.0.1+20260909',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '4.0.1+20260916',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -162,6 +162,7 @@ sub SIGNALduino_Initialize {
             .' doubleMsgCheck_IDs'
             .' eventlogging:0,1'
             .' flashCommand'
+            .' flashDevice'
             .' hardware:esp32s,esp32cc1101,esp8266s,esp8266cc1101,MAPLEMINI_F103CBs,MAPLEMINI_F103CBcc1101,nano328,nanoCC1101,miniculCC1101,promini8cc1101,promini16cc1101,promini8s,promini16s,radinoCC1101'
             .' hexFile'
             .' initCommands'
@@ -3497,7 +3498,9 @@ USB-connected devices (SIGNALduino):<br>
         is the speed (e.g. 57600)
       </li>
       <li>[PORT]<br>
-        is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition
+        is the port the Signalduino is connectd to (e.g. /dev/ttyUSB0) and will be used from the defenition.<br>
+        A device connected over the network (e.g. via ser2net) is passed on to avrdude automatically, no configuration
+        needed. Only if flashing requires a different address, see <a href="#SIGNALDuino_flashDevice">flashDevice</a>.
       </li>
       <li>[HEXFILE]<br>
         is the .hex file that shall get flashed. There are three options (applied in this order):<br>
@@ -3510,6 +3513,16 @@ USB-connected devices (SIGNALduino):<br>
       </li>
     </ul><br>
     <u><i>note:</u></i> ! Sometimes there can be problems flashing radino on Linux. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Here in the wiki under the point "radino & Linux" is a patch!</a>
+  </li><br>
+  <a name="SIGNALDuino_flashDevice"></a>
+  <li>flashDevice<br>
+    Normally not needed. Only set this if the SIGNALduino is reachable under a different address for flashing than
+    during normal operation - through a ser2net port of its own, for example.<br>
+    <ul>
+      <li><code>attr sduino flashDevice raspi:45022</code></li>
+    </ul>
+    With ser2net such a port has to be a plain TCP connection: <code>accepter: tcp,45022</code>. Using
+    <code>telnet(rfc2217)</code> instead makes flashing fail - avrdude then reports <code>not in sync</code> or hangs.
   </li><br>
   <a name="SIGNALDuino_hardware"></a>
   <li>hardware<br>
@@ -4105,7 +4118,10 @@ USB-connected devices (SIGNALduino):<br>
         Ist die Schrittgeschwindigkeit. (z.Bsp: 57600)
       </li>
       <li>[PORT]<br>
-        Ist der Port, an dem der SIGNALduino angeschlossen ist (z.Bsp: /dev/ttyUSB0) und wird von der Definition verwendet.
+        Ist der Port, an dem der SIGNALduino angeschlossen ist (z.Bsp: /dev/ttyUSB0) und wird von der Definition verwendet.<br>
+        Ein &uuml;ber das Netzwerk angebundenes Ger&auml;t (z.Bsp: via ser2net) wird automatisch an avrdude
+        weitergereicht, daf&uuml;r ist nichts einzurichten. Nur wenn zum Flashen eine andere Adresse n&ouml;tig ist,
+        siehe <a href="#SIGNALDuino_flashDevice">flashDevice</a>.
       </li>
       <li>[HEXFILE]<br>
         Ist die .hex-Datei, die geflasht werden soll. Es gibt drei Optionen (angewendet in dieser Reihenfolge):<br>
@@ -4120,6 +4136,17 @@ USB-connected devices (SIGNALduino):<br>
       </li>
     </ul><br>
     <u><i>Hinweis:</u></i> ! Teilweise kann es beim Flashen vom radino unter Linux Probleme geben. <a href="https://wiki.in-circuit.de/index.php5?title=radino_common_problems">Hier im Wiki unter dem Punkt "radino & Linux" gibt es einen Patch!</a>
+  </li><br>
+  <a name="SIGNALDuino_flashDevice"></a>
+  <li>flashDevice<br>
+    Wird normalerweise nicht ben&ouml;tigt. Nur setzen, wenn der SIGNALduino zum Flashen &uuml;ber eine andere Adresse
+    erreichbar ist als im normalen Betrieb &mdash; zum Beispiel &uuml;ber einen eigenen ser2net-Port.<br>
+    <ul>
+      <li><code>attr sduino flashDevice raspi:45022</code></li>
+    </ul>
+    Bei ser2net muss dieser Port eine einfache TCP-Verbindung sein: <code>accepter: tcp,45022</code>. Mit
+    <code>telnet(rfc2217)</code> schl&auml;gt das Flashen fehl &mdash; avrdude meldet dann <code>not in sync</code>
+    oder bleibt h&auml;ngen.
   </li><br>
   <a name="SIGNALDuino_hardware"></a>
   <li>hardware<br>
