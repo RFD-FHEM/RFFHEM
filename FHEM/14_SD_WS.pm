@@ -2248,53 +2248,54 @@ sub SD_WS_Parse {
 
   elsif (defined($decodingSubs->{$protocol}))   # durch den hash decodieren
   {
-    $SensorTyp=$decodingSubs->{$protocol}{sensortype};
-    if (!$decodingSubs->{$protocol}{prematch}->( $rawData,$bitData,$name,$msg )) { 
+    my $decoder = $decodingSubs->{$protocol};   # resolve the protocol subtree once
+    $SensorTyp=$decoder->{sensortype};
+    if (!$decoder->{prematch}->( $rawData,$bitData,$name,$msg )) { 
       Log3 $iohash, 4, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR prematch" ;
       return "";
     }
-    my $retcrc=$decodingSubs->{$protocol}{crcok}->( $rawData,$bitData,$name,$msg );
+    my $retcrc=$decoder->{crcok}->( $rawData,$bitData,$name,$msg );
     if (!$retcrc) {
       Log3 $iohash, 4, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR CRC";
       return "";
     }
-    $id = $decodingSubs->{$protocol}{id}->( $rawData,$bitData,$name,$msg );
-    $temp = $decodingSubs->{$protocol}{temp}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{temp}));
-    $temp2 = $decodingSubs->{$protocol}{temp2}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{temp2}));
-    $temp3 = $decodingSubs->{$protocol}{temp3}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{temp3}));
-    $temp4 = $decodingSubs->{$protocol}{temp4}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{temp4}));
-    $hum = $decodingSubs->{$protocol}{hum}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{hum}));
-    $windspeed = $decodingSubs->{$protocol}{windspeed}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{windspeed}));
-    ($winddir,$winddirtxt) = $decodingSubs->{$protocol}{winddir}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{winddir}));
-    $windgust = $decodingSubs->{$protocol}{windgust}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{windgust}));
-    $channel = $decodingSubs->{$protocol}{channel}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{channel}));
-    $model = $decodingSubs->{$protocol}{model};
-    $modelStat = $decodingSubs->{$protocol}{modelStat}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{modelStat}));
-    $bat = $decodingSubs->{$protocol}{bat}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{bat}));
-    $batVoltage = $decodingSubs->{$protocol}{batVoltage}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{batVoltage}));
-    $batChange = $decodingSubs->{$protocol}{batChange}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{batChange}));
-    $batteryPercent = $decodingSubs->{$protocol}{batteryPercent}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{batteryPercent}));
-    $rawRainCounter = $decodingSubs->{$protocol}{rawRainCounter}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{rawRainCounter}));
-    $rain = $decodingSubs->{$protocol}{rain}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{rain}));
-    $rain_total = $decodingSubs->{$protocol}{rain_total}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{rain_total}));
-    $sendCounter = $decodingSubs->{$protocol}{sendCounter}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{sendCounter}));
-    $beep = $decodingSubs->{$protocol}{beep}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{beep}));
-    $adc = $decodingSubs->{$protocol}{adc}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{adc}));
+    $id = $decoder->{id}->( $rawData,$bitData,$name,$msg );
+    $temp = $decoder->{temp}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{temp}));
+    $temp2 = $decoder->{temp2}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{temp2}));
+    $temp3 = $decoder->{temp3}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{temp3}));
+    $temp4 = $decoder->{temp4}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{temp4}));
+    $hum = $decoder->{hum}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{hum}));
+    $windspeed = $decoder->{windspeed}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{windspeed}));
+    ($winddir,$winddirtxt) = $decoder->{winddir}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{winddir}));
+    $windgust = $decoder->{windgust}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{windgust}));
+    $channel = $decoder->{channel}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{channel}));
+    $model = $decoder->{model};
+    $modelStat = $decoder->{modelStat}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{modelStat}));
+    $bat = $decoder->{bat}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{bat}));
+    $batVoltage = $decoder->{batVoltage}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{batVoltage}));
+    $batChange = $decoder->{batChange}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{batChange}));
+    $batteryPercent = $decoder->{batteryPercent}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{batteryPercent}));
+    $rawRainCounter = $decoder->{rawRainCounter}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{rawRainCounter}));
+    $rain = $decoder->{rain}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{rain}));
+    $rain_total = $decoder->{rain_total}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{rain_total}));
+    $sendCounter = $decoder->{sendCounter}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{sendCounter}));
+    $beep = $decoder->{beep}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{beep}));
+    $adc = $decoder->{adc}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{adc}));
     if ($model eq "SD_WS_33_T" || $model eq "SD_WS_58_T") {      # for SD_WS_33 or SD_WS_58 discrimination T - TH
-      $model = $decodingSubs->{$protocol}{model}."H" if $hum != 0; # for models with Humidity
+      $model = $decoder->{model}."H" if $hum != 0; # for models with Humidity
     }
-    $sendmode = $decodingSubs->{$protocol}{sendmode}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{sendmode}));
-    $trend = $decodingSubs->{$protocol}{trend}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{trend}));
-    $distance = $decodingSubs->{$protocol}{distance}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{distance}));
-    $count = $decodingSubs->{$protocol}{count}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{count}));
-    $identified = $decodingSubs->{$protocol}{identified}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{identified}));
-    $uv = $decodingSubs->{$protocol}{uv}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{uv}));
-    $brightness = $decodingSubs->{$protocol}{brightness}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{brightness}));
-    $transmitter = $decodingSubs->{$protocol}{transmitter}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{transmitter}));
-    $dcf = $decodingSubs->{$protocol}{dcf}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{dcf}));
-    $dcfStatus = $decodingSubs->{$protocol}{dcfStatus}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{dcfStatus}));
-    $pm2_5 = $decodingSubs->{$protocol}{pm_2_5}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{pm_2_5}));
-    $pm10 = $decodingSubs->{$protocol}{pm_10}->( $rawData,$bitData,$name,$msg ) if (exists($decodingSubs->{$protocol}{pm_10}));
+    $sendmode = $decoder->{sendmode}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{sendmode}));
+    $trend = $decoder->{trend}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{trend}));
+    $distance = $decoder->{distance}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{distance}));
+    $count = $decoder->{count}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{count}));
+    $identified = $decoder->{identified}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{identified}));
+    $uv = $decoder->{uv}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{uv}));
+    $brightness = $decoder->{brightness}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{brightness}));
+    $transmitter = $decoder->{transmitter}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{transmitter}));
+    $dcf = $decoder->{dcf}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{dcf}));
+    $dcfStatus = $decoder->{dcfStatus}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{dcfStatus}));
+    $pm2_5 = $decoder->{pm_2_5}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{pm_2_5}));
+    $pm10 = $decoder->{pm_10}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{pm_10}));
     Log3 $iohash, 4, "$name: SD_WS_Parse decoded protocol-id $protocol ($SensorTyp), sensor-id $id";
   }
   else {
