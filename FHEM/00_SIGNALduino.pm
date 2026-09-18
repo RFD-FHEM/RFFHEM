@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 0 2026-09-16 14:47:28Z sidey79 $
+# $Id: 00_SIGNALduino.pm 0 2026-09-17 17:26:56Z sidey79 $
 # https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -26,7 +26,7 @@ no warnings 'portable';
 
 eval {use Data::Dumper qw(Dumper);1};
 use constant {
-  SDUINO_VERSION                  => '4.0.1+20260916',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '4.0.1+20260917',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -3258,7 +3258,8 @@ USB-connected devices (SIGNALduino):<br>
     The SIGNALduino needs the right firmware to be able to receive and deliver the sensor data to fhem. In addition to the way using the arduino IDE to flash the firmware into the SIGNALduino this provides a way to flash it directly from FHEM. You can specify a file on your fhem server or specify a url from which the firmware is downloaded.<br><br>
     There are some requirements:
     <ul>
-      <li>avrdude must be installed on the host<br> On a Raspberry PI this can be done with: sudo apt-get install avrdude</li>
+      <li>avrdude must be installed on the host<br> On a Raspberry PI this can be done with: sudo apt-get install avrdude.
+          Only needed for Arduino based hardware; ESP8266 and ESP32 are flashed over the network without it.</li>
       <li>the hardware attribute must be set if using any other hardware as an Arduino nano<br> This attribute defines the command, that gets sent to avrdude to flash the uC.</li>
       <li>If you encounter a problem, look into the logfile</li>
     </ul><br>
@@ -3522,7 +3523,13 @@ USB-connected devices (SIGNALduino):<br>
       <li><code>attr sduino flashDevice raspi:45022</code></li>
     </ul>
     With ser2net such a port has to be a plain TCP connection: <code>accepter: tcp,45022</code>. Using
-    <code>telnet(rfc2217)</code> instead makes flashing fail - avrdude then reports <code>not in sync</code> or hangs.
+    <code>telnet(rfc2217)</code> instead makes flashing fail - avrdude then reports <code>not in sync</code> or hangs.<br>
+    For ESP8266 and ESP32 the firmware is uploaded over http instead, and the address from the definition is used
+    automatically. Set this attribute only if the web interface of the device answers somewhere else, as a complete
+    address including the path:<br>
+    <ul>
+      <li><code>attr signalesp flashDevice http://192.168.1.40:8080/u</code></li>
+    </ul>
   </li><br>
   <a name="SIGNALDuino_hardware"></a>
   <li>hardware<br>
@@ -3530,7 +3537,8 @@ USB-connected devices (SIGNALduino):<br>
     The simple single wire option,  consists of a single wire connected receiver and a single wire connected transmitter which are connected over a single digital port with the microcontroller.
     The receiver only sends data and the transmitter receives only from the microcontroller.
     The other option consists of the cc1101 (sub 1 GHZ) chip, which can transmit and receiver. It's a transceiver which is connected via spi.
-    ESP8266 hardware type, currently doesn't support flashing out of the module and needs at leat 1 MB of flash.
+    ESP8266 and ESP32 need at least 1 MB of flash. They are flashed over the network rather than with avrdude - the
+    firmware is uploaded to the device itself, so no additional tool is required on the FHEM host.
     <ul>
       <li>esp32s: ESP32 with simple single wire receiver</li>
       <li>esp32cc1101: ESP32 with CC1101 (spi connected) receiver</li>
@@ -3883,7 +3891,8 @@ USB-connected devices (SIGNALduino):<br>
     Der SIGNALduino ben&ouml;tigt die richtige Firmware, um die Sensordaten zu empfangen und zu liefern. Unter Verwendung der Arduino IDE zum Flashen der Firmware in den SIGNALduino bietet dies eine M&ouml;glichkeit, ihn direkt von FHEM aus zu flashen. Sie k&ouml;nnen eine Datei auf Ihrem fhem-Server angeben oder eine URL angeben, von der die Firmware heruntergeladen wird.<br><br>
     Es gibt einige Anforderungen:
     <ul>
-      <li><code>avrdude</code> muss auf dem Host installiert sein. Auf einem Raspberry PI kann dies getan werden mit: <code>sudo apt-get install avrdude</code>
+      <li><code>avrdude</code> muss auf dem Host installiert sein. Auf einem Raspberry PI kann dies getan werden mit: <code>sudo apt-get install avrdude</code>.
+          Nur f&uuml;r Arduino-basierte Hardware n&ouml;tig &mdash; ESP8266 und ESP32 werden ohne avrdude &uuml;ber das Netzwerk geflasht.
       </li>
       <li>Das Hardware-Attribut muss festgelegt werden, wenn eine andere Hardware als Arduino Nano verwendet wird. Dieses Attribut definiert den Befehl, der an avrdude gesendet wird, um den uC zu flashen.
       </li>
@@ -4146,7 +4155,13 @@ USB-connected devices (SIGNALduino):<br>
     </ul>
     Bei ser2net muss dieser Port eine einfache TCP-Verbindung sein: <code>accepter: tcp,45022</code>. Mit
     <code>telnet(rfc2217)</code> schl&auml;gt das Flashen fehl &mdash; avrdude meldet dann <code>not in sync</code>
-    oder bleibt h&auml;ngen.
+    oder bleibt h&auml;ngen.<br>
+    Bei ESP8266 und ESP32 wird die Firmware stattdessen per http &uuml;bertragen, wobei die Adresse aus der Definition
+    automatisch verwendet wird. Das Attribut ist hier nur zu setzen, wenn die Weboberfl&auml;che des Ger&auml;ts unter
+    einer anderen Adresse antwortet &mdash; dann als vollst&auml;ndige Adresse einschlie&szlig;lich Pfad:<br>
+    <ul>
+      <li><code>attr signalesp flashDevice http://192.168.1.40:8080/u</code></li>
+    </ul>
   </li><br>
   <a name="SIGNALDuino_hardware"></a>
   <li>hardware<br>
@@ -4154,7 +4169,9 @@ USB-connected devices (SIGNALduino):<br>
     Die einfache Variante besteht aus einem Empf&auml;nger und einen Sender, die über je eine einzige digitale Signalleitung Datem mit dem Microcontroller austauschen.
     Der Empf&auml;nger sendet dabei und der Sender empf&auml;ngt dabei ausschließlich.
     Weiterhin existiert der sogenannte cc1101 (sub 1 GHZ) Chip, welcher empfangen und senden kann. Dieser wird über die SPI Verbindung angebunden.
-    ESP8266/ESP32 Hardware Typen unterstützen derzeit kein flashen aus dem Modul und ben&ouml;tigen mindestens 1 MB Flash Speicher.
+    ESP8266 und ESP32 ben&ouml;tigen mindestens 1 MB Flash Speicher. Sie werden nicht mit avrdude, sondern &uuml;ber das
+    Netzwerk geflasht &mdash; die Firmware wird direkt auf das Ger&auml;t geladen, auf dem FHEM-Rechner ist daf&uuml;r
+    kein zus&auml;tzliches Werkzeug n&ouml;tig.
     <ul>
       <li>ESP32s: ESP32 f&uuml;r einfachen eindraht Empf&auml;nger</li>
       <li>ESP32cc1101: ESP32 mit einem CC110x-Empf&auml;nger (SPI Verbindung)</li>

@@ -10,10 +10,20 @@ use File::Spec;
 use IPC::Open3;
 
 our $VERSION = "0.01";
+
+use constant {
+  SDUINO_ESP_FLASH_TIMEOUT => 120,          # an OTA upload takes considerably longer than a request
+  SDUINO_ESP_REBOOT_WAIT   => 15,           # the device restarts before it answers again
+  SDUINO_ESP_MAX_IMAGE     => 4 * 1024 * 1024,  # larger than any esp image, guards against a wrong file
+};
+
 our @EXPORT_OK = qw(
   SIGNALduino_flashLogName
   SIGNALduino_flashLogFile
   SIGNALduino_avrdude
+  SIGNALduino_EspFlash
+  SIGNALduino_EspFlashResponse
+  SIGNALduino_EspReopen
   SIGNALduino_PrepareFlash
   SIGNALduino_Set_flash
   SIGNALduino_Get_availableFirmware
@@ -138,6 +148,250 @@ sub _avrdude_port {
   return "net:$dev" if $dev =~ m{\A [^:\s/\\]+ : \d+ \z}xms;   # host:port
 
   return $dev;
+}
+
+############################# package main
+## True for an address that names a local device file rather than a network endpoint.
+sub _is_local_device {
+  my $target = shift;
+
+  return $target =~ m{\A (?: / | [A-Za-z]: [\\/] | COM \d )}ixms ? 1 : 0;
+}
+
+## Guards against whitespace and control characters reaching the Host header. The address
+## comes from an attribute or the definition, so it is trusted but not necessarily correct.
+sub _is_valid_url {
+  my $url = shift;
+
+  return 0 if $url =~ m{[[:space:][:cntrl:]]}xms;
+
+  return $url =~ m{\A https?:// [^/]+ / }ixms ? 1 : 0;
+}
+
+## Writes the collected protocol to the file SIGNALduino_FW_Detail offers as "Last Flashlog",
+## so an ESP flash leaves the same trace as an avrdude run instead of the previous one.
+sub _write_flash_log {
+  my $hash = shift;
+
+  my $logFile = SIGNALduino_flashLogFile($hash);
+  open my $fh, '>', $logFile or do {
+    $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: cannot write flash log $logFile: $!");
+    return;
+  };
+  print {$fh} $hash->{helper}{avrdudelogs} // q{};
+  close $fh;
+
+  return;
+}
+
+## The OTA endpoint of an ESP. Its firmware runs the WiFiManager web portal permanently
+## (startWebPortal with a non blocking config portal), which serves the form at /update but
+## takes the upload at /u.
+## A port is only kept when the user spelled the address out in flashDevice - the one from
+## the definition is the telnet port the firmware listens on, not its web server.
+sub _esp_update_url {
+  my ($target, $from_attribute) = @_;
+
+  return $target if $target =~ m{\A https?:// }ixms;   # a complete URL wins
+
+  my ($host, $port) = $target =~ m{\A (.*) : (\d+) \z}xms;
+  $host = $target if !defined $host;                   # no port in the address at all
+
+  return "http://$host:$port/u" if $from_attribute && defined $port;
+
+  return "http://$host/u";
+}
+
+############################# package main
+## Builds the multipart/form-data body for the upload. Returns body and boundary; the
+## caller needs the boundary for the Content-Type header.
+sub _esp_multipart_body {
+  my ($filename, $image) = @_;
+
+  $filename =~ s{["\r\n]}{}gxms;   # must not break out of the header field
+
+  my $boundary = sprintf 'SIGNALduinoFlash%08x%08x', int(rand(0xffffffff)), int(rand(0xffffffff));
+  my $body = "--$boundary\r\n"
+           . qq{Content-Disposition: form-data; name="update"; filename="$filename"\r\n}
+           . "Content-Type: application/octet-stream\r\n\r\n"
+           . $image
+           . "\r\n--$boundary--\r\n";
+
+  return ($body, $boundary);
+}
+
+############################# package main
+sub SIGNALduino_EspFlash {
+  my ($hash, $binFile) = @_;
+
+  ref($hash) eq 'HASH' or carp 'SIGNALduino_EspFlash: parameter 1 is not a hash reference';
+
+  my $name      = $hash->{NAME};
+  my $attribute = main::AttrVal($name, 'flashDevice', q{});
+  my $target    = _resolve_flash_target($hash);
+
+  # An ESP on a serial line has no http endpoint. Without this the address would be turned
+  # into a nonsensical URL and the device would be disconnected for nothing.
+  if (_is_local_device($target))
+  {
+    $hash->{logMethod}->($name, 1, "$name: EspFlash, $target is a serial device, flashing over http needs a network address");
+    $hash->{FLASH_RESULT} = "ERROR: $target is not reachable over http, an ESP is flashed over the network";
+    return $hash->{FLASH_RESULT};
+  }
+
+  my $url = _esp_update_url($target, $attribute ne q{});
+  if (!_is_valid_url($url))
+  {
+    $hash->{logMethod}->($name, 1, "$name: EspFlash, refusing to upload to malformed address $url");
+    $hash->{FLASH_RESULT} = 'ERROR: address of the device is not a usable url';
+    return $hash->{FLASH_RESULT};
+  }
+
+  open my $fh, '<', $binFile or do {
+    my $error = $!;
+    $hash->{logMethod}->($name, 1, "$name: EspFlash, cannot read firmware file $binFile: $error");
+    $hash->{FLASH_RESULT} = "ERROR: cannot read $binFile";
+    return $hash->{FLASH_RESULT};
+  };
+  binmode $fh;
+
+  my $size = -s $fh // 0;
+  if ($size <= 0 || $size > SDUINO_ESP_MAX_IMAGE)
+  {
+    close $fh;
+    $hash->{logMethod}->($name, 1, "$name: EspFlash, implausible size of $binFile: $size bytes");
+    $hash->{FLASH_RESULT} = "ERROR: implausible firmware size ($size bytes)";
+    return $hash->{FLASH_RESULT};
+  }
+
+  my $image = do { local $/ = undef; <$fh> };
+  close $fh;
+
+  # HttpUtils runs the body through Encode::encode when "encoding unicode" is set, which
+  # would turn every byte above 0x7f into two and corrupt the image silently.
+  utf8::downgrade($image, 1);
+
+  # Both ESP8266 and ESP32 images start with this magic byte. Catching it here saves a
+  # pointless upload and the reboot that follows a rejected one.
+  if (substr($image, 0, 1) ne "\xE9")
+  {
+    $hash->{logMethod}->($name, 1, "$name: EspFlash, $binFile does not look like an ESP firmware image");
+    $hash->{FLASH_RESULT} = 'ERROR: not an ESP firmware image';
+    return $hash->{FLASH_RESULT};
+  }
+
+  my ($filename) = $binFile =~ m{([^/\\]+)\z}xms;
+  $filename //= 'firmware.bin';
+  my ($body, $boundary) = _esp_multipart_body($filename, $image);
+
+  $hash->{logMethod}->($name, 3, "$name: EspFlash, uploading $filename ($size bytes) to $url");
+  $hash->{helper}{avrdudelogs} = "flashing ESP $name\n"
+                               . "firmware: $binFile\n"
+                               . "size: $size bytes\n"
+                               . "url: $url\n\n";
+
+  # The device reboots after a successful upload, so the operational connection has to go
+  # before the upload rather than after it. DevState keeps the keepalive from resetting the
+  # device mid upload: it only bails out on 'disconnected', and DevIo_CloseDev leaves it be.
+  $hash->{DevState} = 'disconnected';
+  main::DevIo_CloseDev($hash);
+  main::readingsSingleUpdate($hash, 'state', 'FIRMWARE UPDATE running', 1);
+  delete $hash->{FLASH_RESULT};
+
+  main::HttpUtils_NonblockingGet({
+    url      => $url,
+    method   => 'POST',
+    timeout  => SDUINO_ESP_FLASH_TIMEOUT,
+    hash     => $hash,
+    data     => $body,
+    header   => "Content-Type: multipart/form-data; boundary=$boundary",
+    callback => \&SIGNALduino_EspFlashResponse,
+    command  => 'espflash',
+    hideurl  => 1,   # the address may carry credentials, keep them out of the log
+  });
+
+  return;
+}
+
+############################# package main
+## Evaluates the upload. WiFiManager answers with 200 in both cases and only differs in the
+## page it returns, so the body decides - see HTTP_UPDATE_SUCCESS / HTTP_UPDATE_FAIL in
+## wm_strings_en.h. On success the device restarts, hence the delayed reconnect.
+sub SIGNALduino_EspFlashResponse {
+  my ($param, $err, $data) = @_;
+  my $hash = $param->{hash};
+  my $name = $hash->{NAME};
+
+  # Scheduled before anything is evaluated: whatever happens below, the device has to be
+  # picked up again, otherwise it stays offline until someone runs "set <device> reset".
+  main::FHEM::Core::Timer::Helper::addTimer($name, gettimeofday() + SDUINO_ESP_REBOOT_WAIT, \&SIGNALduino_EspReopen, $name);
+
+  $data //= q{};
+
+  my $error;
+  if ($err ne q{})
+  {
+    $error = "ERROR: firmware upload failed - $err";
+    $hash->{logMethod}->($name, 1, "$name: EspFlashResponse, upload failed: $err");
+  }
+  elsif (defined $param->{code} && $param->{code} != 200)
+  {
+    $error = "ERROR: device answered with HTTP $param->{code}";
+    $hash->{logMethod}->($name, 1, "$name: EspFlashResponse, device answered with HTTP $param->{code}");
+  }
+  elsif ($data !~ m{Update\s+successful}ixms)
+  {
+    # A rejected image is answered with 200 as well and only the page differs, so success
+    # has to be stated explicitly. Anything else - the upload form, a captive portal, an
+    # empty body because the device rebooted early - counts as failure rather than success.
+    my ($reason) = $data =~ m{OTA \s+ Error: \s* ([\w\ .:,()/-]{0,200})}ixms;
+    $reason //= $data =~ m{Update\s+failed}ixms ? 'no reason reported' : 'unexpected answer from the device';
+    $error = "ERROR: device did not confirm the update - $reason";
+    $hash->{logMethod}->($name, 1, "$name: EspFlashResponse, device did not confirm the update: $reason");
+  }
+  else
+  {
+    $hash->{logMethod}->($name, 3, "$name: EspFlashResponse, firmware update was successfull");
+  }
+
+  $hash->{helper}{avrdudelogs} .= "--- ESP ---------------------------------------------------------------------------------\n";
+  $hash->{helper}{avrdudelogs} .= $error // 'Update successful, device rebooting';
+  $hash->{helper}{avrdudelogs} .= "\n\n";
+  _write_flash_log($hash);
+
+  if (defined $error)
+  {
+    $hash->{FLASH_RESULT} = $error;                                              # processed in tests
+    main::readingsSingleUpdate($hash, 'state', 'FIRMWARE UPDATE with error', 1); # processed in tests
+    if (defined $main::FW_wname)
+    {
+      # The reason comes from the device, so it is escaped before it ends up inside a
+      # javascript string literal.
+      my $dialog = $error;
+      $dialog =~ s{([\\'])}{\\$1}gxms;
+      $dialog =~ s{\s+}{ }gxms;
+      main::FW_directNotify("FILTER=$name", "#FHEMWEB:$main::FW_wname", "FW_okDialog('$dialog')", q{});
+    }
+  }
+  else
+  {
+    main::readingsSingleUpdate($hash, 'state', 'FIRMWARE UPDATE successfull', 1); # processed in tests
+  }
+
+  return;
+}
+
+############################# package main
+sub SIGNALduino_EspReopen {
+  my $name = shift;
+  my $hash = $main::defs{$name};
+
+  return if !defined $hash;
+
+  main::DevIo_OpenDev($hash, 0, \&main::SIGNALduino_DoInit, \&main::SIGNALduino_Connect);
+  $hash->{helper}{avrdudelogs} .= "$name reopen started\n";
+
+  return;
 }
 
 ############################# package main
@@ -272,11 +526,13 @@ sub SIGNALduino_PrepareFlash {
   }
   $hash->{logMethod}->($name, 3, "$name: Set_flash, filename $hexFile provided, trying to flash");
 
-  # Only for Arduino , not for ESP
   my $hardware = main::AttrVal($name,'hardware','');
   if ($hardware =~ m/(?:nano|mini|radino)/)
   {
-    return SIGNALduino_PrepareFlash($hash,$hexFile);
+    return SIGNALduino_PrepareFlash($hash,$hexFile);   # avrdude over serial or network
+  } elsif ($hardware =~ m/\Aesp/ixms)
+  {
+    return SIGNALduino_EspFlash($hash,$hexFile);       # http upload to the device itself
   } else {
     if (defined $main::FW_wname)
     {
