@@ -1,3 +1,6 @@
+2026-09-18 - Merge pull request #1401 from RFD-FHEM/feat/esp-http-flash
+
+feat: ESP8266 und ESP32 über HTTP flashen
 2026-09-17 - Merge pull request #1396 from RFD-FHEM/feat/flash-over-tcp
 
 feat: Flashen von Geräten, die über das Netzwerk angebunden sind
