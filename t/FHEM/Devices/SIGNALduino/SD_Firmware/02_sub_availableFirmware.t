@@ -248,25 +248,44 @@ subtest 'Set_flash tests' => sub {
   subtest 'unsupported hardware returns error and can trigger FW notify' => sub {
     plan(5);
     reset_set_flash_state();
-    $mock_hardware = 'esp32';
+    # Maple mini is what is left without a flash path: avrdude does not speak to it and it
+    # has no http upload either.
+    $mock_hardware = 'MAPLEMINI_F103CBcc1101';
     $mock_fw->override('SIGNALduino_PrepareFlash' => sub { return 'SHOULD_NOT_BE_USED'; });
 
     my $ret_without_web = FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_Set_flash($targetHash, 'flash', './fhem/test.hex');
     {
       local $main::FW_wname = 'testweb';
       my $ret_with_web = FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_Set_flash($targetHash, 'flash', './fhem/test.hex');
-      is($ret_with_web, 'Sorry, Flashing your esp32 via Module is currently not supported.', 'returns unsupported message with FW context');
+      is($ret_with_web, 'Sorry, Flashing your MAPLEMINI_F103CBcc1101 via Module is currently not supported.', 'returns unsupported message with FW context');
     }
 
     my $prepare_calls = $mock_fw->sub_tracking->{SIGNALduino_PrepareFlash} // [];
     my $http_calls = $mock_main->sub_tracking->{HttpUtils_NonblockingGet} // [];
     my $notify_calls = $mock_main->sub_tracking->{FW_directNotify} // [];
 
-    is($ret_without_web, 'Sorry, Flashing your esp32 via Module is currently not supported.', 'returns unsupported message');
+    is($ret_without_web, 'Sorry, Flashing your MAPLEMINI_F103CBcc1101 via Module is currently not supported.', 'returns unsupported message');
     is(scalar(@{$prepare_calls}), 0, 'PrepareFlash not called for unsupported hardware');
     is(scalar(@{$http_calls}), 0, 'HttpUtils_NonblockingGet not called for unsupported hardware');
     is(scalar(@{$notify_calls}), 1, 'FW_directNotify called when FW_wname is set');
 
+    $mock_fw->restore('SIGNALduino_PrepareFlash');
+  };
+
+  subtest 'esp hardware is routed to the http flash' => sub {
+    plan(3);
+    reset_set_flash_state();
+    $mock_hardware = 'esp8266cc1101';
+    $mock_fw->override('SIGNALduino_EspFlash' => sub { return 'ESP_FLASH_CALLED'; });
+    $mock_fw->override('SIGNALduino_PrepareFlash' => sub { return 'SHOULD_NOT_BE_USED'; });
+
+    my $ret = FHEM::Devices::SIGNALduino::SD_Firmware::SIGNALduino_Set_flash($targetHash, 'flash', './fhem/test.bin');
+
+    is($ret, 'ESP_FLASH_CALLED', 'EspFlash handles esp hardware');
+    is(scalar(@{$mock_fw->sub_tracking->{SIGNALduino_EspFlash} // []}), 1, 'EspFlash called once');
+    is(scalar(@{$mock_fw->sub_tracking->{SIGNALduino_PrepareFlash} // []}), 0, 'avrdude path is not used');
+
+    $mock_fw->restore('SIGNALduino_EspFlash');
     $mock_fw->restore('SIGNALduino_PrepareFlash');
   };
 };

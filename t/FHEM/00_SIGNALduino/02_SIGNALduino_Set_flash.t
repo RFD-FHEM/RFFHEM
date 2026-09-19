@@ -23,7 +23,7 @@ InternalTimer(time()+1, sub {
 	);
 	my $firmwareTracking = $firmwareMock->sub_tracking;
 
-    plan(6);
+    plan(7);
     subtest 'check error returns' => sub {
         my @p=();
         plan(5);
@@ -44,14 +44,30 @@ InternalTimer(time()+1, sub {
         like(SIGNALduino_Set_flash($targetHash,'flash'), qr/ERROR: argument failed! flash \[hexFile\|url\]/,'Verify error without enough parameter');
     };
 
-    subtest 'check hardware without avrdude support' => sub {
-        plan(4);
-        for my $hardware (qw/ESP32 ESP8266 MAPLEMINI_F103CB MAPLEMINI_F103CBcc1101/)
+    subtest 'check hardware without flash support' => sub {
+        plan(2);
+        # ESP hardware is flashed over http since the EspFlash path exists, so only the
+        # maple mini types are left without a way to flash from the module.
+        for my $hardware (qw/MAPLEMINI_F103CB MAPLEMINI_F103CBcc1101/)
         {
             CommandAttr(undef,"$target hardware $hardware");
             my $ret = SIGNALduino_Set_flash($targetHash, 'flash', './fhem/test.hex');
             is($ret, "Sorry, Flashing your $hardware via Module is currently not supported.", "check return value for $hardware");
         }
+    };
+
+    subtest 'esp hardware is routed to the http flash' => sub {
+        plan(4);
+        $firmwareMock->override('SIGNALduino_EspFlash' => sub { return 'ESP_FLASH_CALLED'; });
+        for my $hardware (qw/ESP32 esp8266cc1101/)
+        {
+            $firmwareMock->clear_sub_tracking();
+            CommandAttr(undef,"$target hardware $hardware");
+            my $ret = SIGNALduino_Set_flash($targetHash, 'flash', './fhem/test.bin');
+            is($ret, 'ESP_FLASH_CALLED', "EspFlash used for $hardware");
+            is(scalar @{$firmwareTracking->{SIGNALduino_EspFlash}}, 1, "EspFlash called once for $hardware");
+        }
+        $firmwareMock->restore('SIGNALduino_EspFlash');
     };
 
     subtest 'verify SIGNALduino_PrepareFlash is called correctly' => sub {
