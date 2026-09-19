@@ -127,6 +127,7 @@ sub SD_WS_Initialize {
     'SD_WS_135_T.*'   => { ATTR => 'event-min-interval:.*:300 event-on-change-reading:.*', FILTER => '%NAME', GPLOT => 'temp4:Temp,', autocreateThreshold => '3:180'},
     "SD_WS_136_THW_.*" => { ATTR => "event-min-interval:.*:300 event-on-change-reading:.*", FILTER => "%NAME", GPLOT => "temp4hum4:Temp/Hum,", autocreateThreshold => "3:180"},
   };
+  $hash->{decodingSubs} = SD_WS_DecodingSubs();
   return FHEM::Meta::InitMod( __FILE__, $hash );
 }
 
@@ -203,62 +204,14 @@ sub SD_WS_TimerRemoveReplaceBattery {
 }
 
 #############################
-sub SD_WS_Parse {
-  my ($iohash, $msg) = @_;
-  carp "SD_WS_Parse, too few arguments ($iohash, $msg)" if @_ < 2;
-  my $name = $iohash->{NAME};
-  my $ioname = $iohash->{NAME};
-  my ($protocol,$rawData) = split("#",$msg);
-  $protocol=~ s/^[WP](\d+)/$1/; # extract protocol
-  my $dummyreturnvalue= "Unknown, please report";
-  my $hlen = length($rawData);
-  my $blen = $hlen * 4;
-  my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
-  my $bitData2;
-  my $model;  # wenn im elsif Abschnitt definiert, dann wird der Sensor per AutoCreate angelegt
-  my $modelStat; # for FHEM statistics https://fhem.de/stats/statistics.html
-  my $state = '';
-  my $SensorTyp;
-  my $id;
-  my $bat;
-  my $batChange;
-  my $batVoltage;
-  my $batteryPercent;
-  my $sendmode;
-  my $channel;
-  my $rawTemp;
-  my $temp;
-  my $temp2;
-  my $temp3;
-  my $temp4;
-  my $hum;
-  my $windspeed;
-  my $winddir;
-  my $winddirtxt;
+# Decoding table for all protocols that are handled table-driven. Built once when the
+# module is loaded and stored in the module hash by SD_WS_Initialize, so that SD_WS_Parse
+# does not rebuild roughly 400 closures for every received message.
+sub SD_WS_DecodingSubs {
   my @winddirtxtar=('N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW','N');
-  my $windgust;
-  my $trend;
-  my $trendTemp;
-  my $trendHum;
-  my $rain;
-  my $rain_total;
-  my $rawRainCounter;
-  my $sendCounter;
-  my $beep;
-  my $distance;
-  my $uv;
-  my $adc;
-  my $brightness;
   my @moisture_map=(0, 7, 13, 20, 27, 33, 40, 47, 53, 60, 67, 73, 80, 87, 93, 99); # ID 115
-  my $count;
-  my $identified;
-  my $transmitter;
-  my $dcf;
-  my $dcfStatus;
-  my $pm2_5; # particulate matter <= 2.5 µm
-  my $pm10;  # particulate matter <= 10 µm
 
-  my %decodingSubs = (
+  return {
     27 =>
       {
         # Protokollbeschreibung: Temperatur-/Feuchtigkeitssensor EuroChron EFTH-800, EFS-3110A
@@ -285,7 +238,7 @@ sub SD_WS_Parse {
         bat        => sub {my (undef,$bitData) = @_; return substr($bitData,16,1) eq "0" ? "ok" : "low";},
         temp       => sub {my (undef,$bitData) = @_; return substr($bitData,17,1) eq "0" ? ((SD_WS_binaryToNumber($bitData,18,27) - 1024) / 10.0) : (SD_WS_binaryToNumber($bitData,18,27) / 10.0);},
         hum        => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,32,35) * 10) + (SD_WS_binaryToNumber($bitData,36,39));},
-        crcok      => sub {my $rawData = shift;
+        crcok      => sub {my ($rawData,undef,$name,$msg) = @_;
                             if (HAS_DigestCRC) {
                               my $datacheck1 = pack( 'H*', substr($rawData,0,10) );
                               my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
@@ -344,7 +297,7 @@ sub SD_WS_Parse {
       sensortype => 'E0001PA, s014, S522, TCM, TFA 30.3200, TX-EZ6',
       model      =>  'SD_WS_33_T',
       prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{11}$/); },              # prematch
-      crcok => sub  { my (undef,$bitData) = @_;
+      crcok => sub  { my (undef,$bitData,$name,$msg) = @_;
                       my $crc = 0;
                       for (my $i=0; $i < 34; $i++) {
                         if (substr($bitData, $i, 1) == ($crc & 1)) {
@@ -390,7 +343,7 @@ sub SD_WS_Parse {
         beep       => sub {my (undef,$bitData) = @_; return substr($bitData,9,1) eq "1" ? "on" : "off"; },
         channel    => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11); },
         temp       => sub {my (undef,$bitData) = @_; return ((SD_WS_binaryToNumber($bitData,12,23) - 500) / 10.0); },
-        crcok      => sub {my $msg = shift;
+        crcok      => sub {my ($msg,undef,$name) = @_;
                            my @n = split //, $msg;
                            my $sum1 = hex($n[0]) + hex($n[2]) + hex($n[4]) + 6;
                            my $sum2 = hex($n[1]) + hex($n[3]) + hex($n[5]) + 6 + ($sum1 >> 4);
@@ -423,7 +376,7 @@ sub SD_WS_Parse {
                               $temp *= -1 if (substr($bitData,20,1));
                               return $temp;
                             },
-          crcok      => sub { my $rawData = shift;
+          crcok      => sub { my ($rawData,undef,$name,$msg) = @_;
                               if (HAS_DigestCRC) {
                                 my $datacheck1 = pack( 'H*', substr($rawData,0,12) );
                                 my $crcmein1 = Digest::CRC->new(width => 8, init => 0xFF, poly => 0x31);
@@ -511,7 +464,7 @@ sub SD_WS_Parse {
         model      => 'SD_WS_53_TH',
         # prematch => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{11}$/); },              # prematch
         prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^[0-9A-F]{8}4[0-9A-F]{2}$/); }, # prematch 0700F276 4 A4
-        crcok      => sub { my (undef,$bitData) = @_;
+        crcok      => sub { my (undef,$bitData,$name,$msg) = @_;
                             my $sum = 0;
                             for (my $n = 0; $n < 36; $n += 4) {
                               $sum += SD_WS_binaryToNumber($bitData, $n, $n + 3)
@@ -577,7 +530,7 @@ sub SD_WS_Parse {
                                   return ($rawRainCounterMessage + 10) * 0.254;
                                 }
                               },
-        crcok          => sub {my $rawData = shift;
+        crcok          => sub {my ($rawData,undef,$name,$msg) = @_;
                                 my $checksum = SD_WS_LFSR_digest8_reflect(7, 0x31, 0xf4, $rawData );
                                 if ($checksum == hex(substr($rawData,14,2))) {
                                   return 1;
@@ -607,7 +560,7 @@ sub SD_WS_Parse {
         model      => 'SD_WS_58_T', 
         # prematch => sub {my $msg = shift; return 1 if ($msg =~ /^45[0-9A-F]{11}/); }, # prematch
         prematch   => sub {my $msg = shift; return 1 if ($msg =~ /^4[5|6][0-9A-F]{11}/); }, # prematch, 45=FT007TH/TFA 30.3208.02, 46=FT007T/TFA 30.3228.02
-        crcok      => sub { my $msg = shift;
+        crcok      => sub { my ($msg,undef,$name) = @_;
                             # my @buff = split(//,substr($msg,index($msg,"45"),10));
                             # my $idx = index($msg,"45");
                             my @buff = split(//,substr($msg,0,10));
@@ -751,13 +704,13 @@ sub SD_WS_Parse {
                           },
         winddir    => sub {my (undef,$bitData) = @_;
                             if (substr($bitData,30,2) eq "10") {    # message 2 winddirection
-                              $winddir = SD_WS_binaryToNumber($bitData,44,55);
+                              my $winddir = SD_WS_binaryToNumber($bitData,44,55);
                               return ($winddir * 1, $winddirtxtar[FHEM::Core::Utils::Math::round(($winddir / 22.5),0)]);
                             } else {
                               return;
                             }
                           },
-        crcok      => sub {my ($rawData,undef) = @_;
+        crcok      => sub {my ($rawData,undef,$name,$msg) = @_;
                             if (HAS_DigestCRC) {
                               my $datacheck1 = pack( 'H*', substr($rawData,0,14) );
                               my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
@@ -820,11 +773,12 @@ sub SD_WS_Parse {
                   return sprintf('%02X', SD_WS_bin2dec(substr($_[1],0,8))); 
                   },  
         temp       => sub {
+          my $name = $_[2];   # this decoder addresses its arguments positionally
           my $rawtemp100  = SD_WS_binaryToNumber($_[1],12,15);
           my $rawtemp10   = SD_WS_binaryToNumber($_[1],16,19);
           my $rawtemp1  = SD_WS_binaryToNumber($_[1],20,23);
           if ($rawtemp100 > 9 || $rawtemp10 > 9 || $rawtemp1 > 9) {
-            Log3 $iohash, 3, "$name: SD_WS_Parse $model ERROR - BCD of temperature ($rawtemp100 $rawtemp10 $rawtemp1)";
+            Log3 $name, 3, "$name: SD_WS_Parse SD_WS_94_T ERROR - BCD of temperature ($rawtemp100 $rawtemp10 $rawtemp1)";
             return;
           };
           return ($rawtemp100 * 10 + $rawtemp10 + $rawtemp1 / 10) * ( substr($_[1],10,1) == 1 ? -1.0 : 1.0);
@@ -844,8 +798,8 @@ sub SD_WS_Parse {
         model      => 'SD_WS_106_T',
         prematch   => sub { return 1; }, # no precheck known
         id         => sub { my ($rawData,undef) = @_; return substr($rawData,0,2); },
-        temp       => sub { my (undef,$bitData) = @_;
-                            $rawTemp =  SD_WS_binaryToNumber($bitData,8,21);
+        temp       => sub { my (undef,$bitData,$name,$msg) = @_;
+                            my $rawTemp =  SD_WS_binaryToNumber($bitData,8,21);
                             my $tempFh = $rawTemp / 20 - 90; # Grad Fahrenheit
                             Log3 $name, 4, "$name: SD_WS_106_T tempraw = $rawTemp, temp = $tempFh Fahrenheit";
                             return (FHEM::Core::Utils::Math::round((($tempFh - 32) * 5 / 9) , 1)); # Grad Celsius
@@ -873,12 +827,12 @@ sub SD_WS_Parse {
         # SS:       Sum of the preceding 13 bytes % 256
         sensortype => 'WH51, DP100, MISOL/1',
         model      => 'SD_WS_107_H',
-        prematch   => sub { ($rawData,undef) = @_; return 1 if ($rawData =~ /^51[0-9A-F]{26}/); },
+        prematch   => sub { my ($rawData,undef) = @_; return 1 if ($rawData =~ /^51[0-9A-F]{26}/); },
         id         => sub { my ($rawData,undef) = @_; return substr($rawData,2,6); },
         batVoltage => sub { my (undef,$bitData) = @_; return FHEM::Core::Utils::Math::round(SD_WS_binaryToNumber($bitData,35,39) / 10 , 1); },
         adc        => sub { my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,62,71); },
         hum        => sub { my ($rawData,undef) = @_; return hex(substr($rawData,12,2)); },
-        crcok      => sub { my $rawData = shift;
+        crcok      => sub { my ($rawData,undef,$name,$msg) = @_;
                             if (HAS_DigestCRC) {
                               my $datacheck1 = pack( 'H*', substr($rawData,0,24) );
                               my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
@@ -984,7 +938,7 @@ sub SD_WS_Parse {
                           },
         temp       => sub {my ($rawData,undef) = @_;
                             my $sgn = substr($rawData,23,1) eq "0" ? 1 : -1;
-                            $rawTemp =  $sgn * (substr($rawData,15,1) . substr($rawData,12,1) . '.' .substr($rawData,13,1));
+                            my $rawTemp =  $sgn * (substr($rawData,15,1) . substr($rawData,12,1) . '.' .substr($rawData,13,1));
                             return $rawTemp;
                           },
         hum        => sub {my ($rawData,$bitData) = @_;
@@ -993,7 +947,7 @@ sub SD_WS_Parse {
                           },
         rain       => sub {my ($rawData,$bitData) = @_;
                             return if (substr($bitData,10,2) eq '01'); # Fody E42
-                            $rain = (substr($rawData,20,2) . substr($rawData,18,2)) / 10;
+                            my $rain = (substr($rawData,20,2) . substr($rawData,18,2)) / 10;
                             $rain *= 2.5 if (substr($bitData,10,2) eq '11'); # Bresser rain gauge
                             return $rain;
                           },
@@ -1040,7 +994,7 @@ sub SD_WS_Parse {
                                 }
                               },
         temp           => sub { my (undef,$bitData) = @_; return FHEM::Core::Utils::Math::round(((SD_WS_binaryToNumber($bitData,48,55) * 256 + SD_WS_binaryToNumber($bitData,40,47)) - 1220) * 5 / 90.0 , 1); },
-        crcok          => sub { my (undef,$bitData) = @_;
+        crcok          => sub { my (undef,$bitData,$name,$msg) = @_;
                                 my $sum = 0;
                                 for (my $n = 0; $n < 56; $n += 8) {
                                   $sum += SD_WS_binaryToNumber($bitData, $n, $n + 7)
@@ -1081,7 +1035,7 @@ sub SD_WS_Parse {
                                                      # return '0';
                               # },
         temp       => sub {my (undef,$bitData) = @_; return ((SD_WS_bin2dec(scalar(reverse(substr($bitData,48,4)))) * 16 + SD_WS_bin2dec(scalar(reverse(substr($bitData,52,4)))) * 256 + SD_WS_bin2dec(scalar(reverse(substr($bitData,40,4)))) - 400 ) / 10);},
-        crcok          => sub { my (undef,$bitData) = @_;
+        crcok          => sub { my (undef,$bitData,$name,$msg) = @_;
                                 my $xor = SD_WS_binaryToNumber($bitData, 0, 7);
                                 for (my $n = 8; $n < 72; $n += 8) {
                                   $xor ^= SD_WS_binaryToNumber($bitData, $n, $n + 7);
@@ -1110,14 +1064,14 @@ sub SD_WS_Parse {
         model      => 'SD_WS_113_T',
         prematch   => sub { return 1; }, # no precheck known
         id         => sub { my ($rawData,undef) = @_; return substr($rawData,0,2); },
-        temp       => sub { my (undef,$bitData) = @_;
-                            $rawTemp =  SD_WS_binaryToNumber($bitData,12,13) * 256 + SD_WS_binaryToNumber($bitData,16,23);
+        temp       => sub { my (undef,$bitData,$name,$msg) = @_;
+                            my $rawTemp =  SD_WS_binaryToNumber($bitData,12,13) * 256 + SD_WS_binaryToNumber($bitData,16,23);
                             my $tempFh = $rawTemp - 90; # Grad Fahrenheit
                             Log3 $name, 4, "$name: SD_WS_113_T tempraw1 = $rawTemp, temp1 = $tempFh Grad Fahrenheit";
                             return (FHEM::Core::Utils::Math::round((($tempFh - 32) * 5 / 9) , 0)); # Grad Celsius
                           },
-        temp2      => sub { my (undef,$bitData) = @_;
-                            $rawTemp =  SD_WS_binaryToNumber($bitData,14,15) * 256 + SD_WS_binaryToNumber($bitData,24,31);
+        temp2      => sub { my (undef,$bitData,$name,$msg) = @_;
+                            my $rawTemp =  SD_WS_binaryToNumber($bitData,14,15) * 256 + SD_WS_binaryToNumber($bitData,24,31);
                             my $tempFh = $rawTemp - 90; # Grad Fahrenheit
                             Log3 $name, 4, "$name: SD_WS_113_T tempraw2 = $rawTemp, temp2 = $tempFh Grad Fahrenheit";
                             return (FHEM::Core::Utils::Math::round((($tempFh - 32) * 5 / 9) , 0)); # Grad Celsius
@@ -1179,13 +1133,13 @@ sub SD_WS_Parse {
                           },
         batChange  => sub {my (undef,$bitData) = @_; return substr($bitData,52,1);},
         channel    => sub {my ($rawData,$bitData) = @_;
-                            $channel = '';
+                            my $channel = '';
                             $channel = substr($rawData,12,1) if (substr($rawData,12,1) ne '1'); # not weather station
                             return ($channel . SD_WS_binaryToNumber($bitData,53,55));
                           },
         windgust   => sub {my ($rawData,undef) = @_;
                             return if (substr($rawData,12,1) ne '1'); # only weather station
-                            $windgust = substr($rawData,14,3);
+                            my $windgust = substr($rawData,14,3);
                             $windgust =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
                             # uncoverable branch true
                             return if ($windgust !~ m/^\d+$/xms);
@@ -1193,7 +1147,7 @@ sub SD_WS_Parse {
                           },
         windspeed  => sub {my ($rawData,undef) = @_;
                             return if (substr($rawData,12,1) ne '1'); # only weather station
-                            $windspeed = substr($rawData,18,2) . substr($rawData,17,1);
+                            my $windspeed = substr($rawData,18,2) . substr($rawData,17,1);
                             $windspeed =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
                             # uncoverable branch true
                             return if ($windspeed !~ m/^\d+$/xms);
@@ -1201,13 +1155,13 @@ sub SD_WS_Parse {
                           },
         winddir    => sub {my ($rawData,undef) = @_;
                             return if (substr($rawData,12,1) ne '1' || substr($rawData,20,3) !~ m/^\d+$/xms); # only weather station
-                            $winddir = substr($rawData,20,3);
+                            my $winddir = substr($rawData,20,3);
                             return ($winddir * 1, $winddirtxtar[FHEM::Core::Utils::Math::round(($winddir / 22.5),0)]);
                           },
         temp       => sub {my ($rawData,$bitData) = @_;
                             # uncoverable condition right
                             return if ((substr($rawData,12,1) eq '1' && substr($rawData,33,1) eq '1') || substr($rawData,24,3) !~ m/^\d+$/xms); # not by weather station & rain
-                            $rawTemp = substr($rawData,24,3) * 0.1;
+                            my $rawTemp = substr($rawData,24,3) * 0.1;
                             if (substr($bitData,108,1) eq '1') {
                               if ($rawTemp > 60) {
                                 $rawTemp -= 100; # Bresser 6in1
@@ -1220,7 +1174,7 @@ sub SD_WS_Parse {
         hum        => sub {my ($rawData,undef) = @_;
                             # uncoverable condition right
                             return if ((substr($rawData,12,1) eq '1' && substr($rawData,33,1) eq '1') || substr($rawData,28,2) !~ m/^\d+$/xms); # not by weather station & rain
-                            $hum = substr($rawData,28,2) * 1;
+                            my $hum = substr($rawData,28,2) * 1;
                             if (substr($rawData,12,1) eq '4' && $hum >= 1 && $hum <= 16) {  # Soil Moisture
                               return $moisture_map[$hum - 1];
                             }
@@ -1228,7 +1182,7 @@ sub SD_WS_Parse {
                           },
         rain       => sub {my ($rawData,undef) = @_;
                             return if (substr($rawData,33,1) ne '1' || substr($rawData,12,1) ne '1'); # message type || weather station
-                            $rain = substr($rawData,24,6);
+                            my $rain = substr($rawData,24,6);
                             $rain =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
                             # uncoverable branch true
                             return if ($rain !~ m/^\d+$/xms);
@@ -1236,7 +1190,7 @@ sub SD_WS_Parse {
                           },
         uv         => sub {my ($rawData,undef) = @_;
                             return if (substr($rawData,33,1) ne '0' || substr($rawData,12,1) ne '1'); # message type || weather station
-                            $uv = substr($rawData,30,3);
+                            my $uv = substr($rawData,30,3);
                             $uv =~ tr/0123456789ABCDEF/FEDCBA9876543210/;
                             # uncoverable branch true
                             return if ($uv !~ m/^\d+$/xms);
@@ -1262,9 +1216,9 @@ sub SD_WS_Parse {
         # SS:   Sum of the preceding 8 bytes % 256
         sensortype     => 'WH57, DP60, WH31L',
         model          => 'SD_WS_116',
-        prematch       => sub { ($rawData,undef) = @_; return 1 if ($rawData =~ /^57/); },
+        prematch       => sub { my ($rawData,undef) = @_; return 1 if ($rawData =~ /^57/); },
         identified     => sub { my ($rawData,undef) = @_;
-                                $identified = substr($rawData,2,1);
+                                my $identified = substr($rawData,2,1);
                                 if ($identified eq '0') {
                                   $identified = 'nothing';
                                 } elsif ($identified eq '1') {
@@ -1280,7 +1234,7 @@ sub SD_WS_Parse {
         batteryPercent => sub { my ($rawData,undef) = @_; return hex(substr($rawData,9,1)) * 20; },
         distance       => sub { my ($rawData,undef) = @_; return hex(substr($rawData,10,2)); },
         count          => sub { my ($rawData,undef) = @_; return hex(substr($rawData,12,2)); },
-        crcok          => sub { my $rawData = shift;
+        crcok          => sub { my ($rawData,undef,$name,$msg) = @_;
                                 if (HAS_DigestCRC) {
                                   my $datacheck1 = pack( 'H*', substr($rawData,0,14) );
                                   my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
@@ -1357,7 +1311,7 @@ sub SD_WS_Parse {
         id         => sub {my ($rawData,undef) = @_; return substr($rawData,4,4); },
         winddir    => sub {my ($rawData,undef) = @_;
                             return if (substr($rawData,12,1) ne 'B'); # only weather station
-                            $winddir = substr($rawData,8,3);
+                            my $winddir = substr($rawData,8,3);
                             return ($winddir * 1, $winddirtxtar[FHEM::Core::Utils::Math::round(($winddir / 22.5),0)]);
                           },
         modelStat  => sub {my ($rawData,undef) = @_;
@@ -1398,7 +1352,7 @@ sub SD_WS_Parse {
                           },
         temp       => sub {my ($rawData,undef) = @_;
                             return if (substr($rawData,12,1) ne 'B'); # only Bresser_7in1 outdoor sensor
-                            $rawTemp = substr($rawData,28,3) * 0.1;
+                            my $rawTemp = substr($rawData,28,3) * 0.1;
                             if ($rawTemp > 60) {$rawTemp -= 100};
                             return FHEM::Core::Utils::Math::round($rawTemp,1);
                           },
@@ -1489,7 +1443,7 @@ sub SD_WS_Parse {
                                        . SD_WS_binaryToNumber($bitData,32,34) . SD_WS_binaryToNumber($bitData,35,38) . ':' # minute
                                        . SD_WS_binaryToNumber($bitData,40,42) . SD_WS_binaryToNumber($bitData,43,46) # second
                               },
-        crcok          => sub {my $rawData = shift;
+        crcok          => sub {my ($rawData,undef,$name,$msg) = @_;
                                 if (HAS_DigestCRC) {
                                   my $datacheck1 = pack( 'H*', substr($rawData,2,length($rawData)-2) );
                                   my $crcmein1 = Digest::CRC->new(width => 8, poly => 0x31);
@@ -1583,7 +1537,7 @@ sub SD_WS_Parse {
                                 return if (substr($rawData,28,4) eq '1405');
                                 return ( (hex(substr($rawData,28,2)) + hex(substr($rawData,30,2)) * 256) / 10 );
                               },
-        crcok          => sub { my ($rawData,undef) = @_;
+        crcok          => sub { my ($rawData,undef,$name,$msg) = @_;
                                 my $calcsum = SD_WS_crc16lsb(16, 0xA001, 0x86F4, $rawData);
                                 my $checksum = hex(substr($rawData,32,2)) + hex(substr($rawData,34,2)) * 256;
                                 if ($checksum == $calcsum) {
@@ -1648,7 +1602,7 @@ sub SD_WS_Parse {
                             return '20' . substr($rawData,6,2) . '-' . substr($rawData,8,2) . '-' . substr($rawData,10,2) . ' ' # date
                                         . substr($rawData,12,2) . ':' . substr($rawData,14,2) . ':' . substr($rawData,16,2);    # time
                           },
-        crcok      => sub {my ($rawData,undef) = @_;
+        crcok      => sub {my ($rawData,undef,$name,$msg) = @_;
                             my $crcLength = 12; # temp/hum message
                             $crcLength = 20 if ($rawData =~ /^(52)/); # time message
                             if (HAS_DigestCRC) {
@@ -1701,7 +1655,7 @@ sub SD_WS_Parse {
         batVoltage      => sub {  my (undef,$bitData) = @_; 
                                   my $v = oct(q[0b].substr($bitData,35,5));
                                   return $v ne '0' ? $v / 10 : undef; },
-        crcok           => sub { my ($rawData,undef) = @_;
+        crcok           => sub { my ($rawData,undef,$name,$msg) = @_;
                             if (HAS_DigestCRC) {
                               my $calc_crc8 = Digest::CRC->new(width => 8, poly=>0x31);
                               my $crc_digest = $calc_crc8->add( pack 'H*', substr( $rawData, 0, 16 ) )->digest;
@@ -1755,7 +1709,7 @@ sub SD_WS_Parse {
         windspeed  => sub {my (undef,$bitData) = @_; return FHEM::Core::Utils::Math::round(((substr($bitData,31,1) * 256 + SD_WS_binaryToNumber($bitData,32,39)) / 10.0),1);},
         windgust   => sub {my (undef,$bitData) = @_; return FHEM::Core::Utils::Math::round(((substr($bitData,30,1) * 256 + SD_WS_binaryToNumber($bitData,40,47)) / 10.0),1);},
         winddir    => sub {my (undef,$bitData) = @_;
-                            $winddir = substr($bitData,29,1) * 256 + SD_WS_binaryToNumber($bitData,48,55);
+                            my $winddir = substr($bitData,29,1) * 256 + SD_WS_binaryToNumber($bitData,48,55);
                             return ($winddir * 1, $winddirtxtar[FHEM::Core::Utils::Math::round(($winddir / 22.5),0)]);
                           },
         rain       => sub {my ($rawData,undef) = @_; return 0.1 * hex(substr($rawData,14,4));},
@@ -1769,7 +1723,7 @@ sub SD_WS_Parse {
                             return if (substr($rawData,28,2) eq 'FB');
                             return 0.1 * hex(substr($rawData,28,2));
                           },
-        crcok      => sub { my ($rawData,undef) = @_; 
+        crcok      => sub { my ($rawData,undef,$name,$msg) = @_; 
                             if (HAS_DigestCRC) {
                               my $calc_crc8 = Digest::CRC->new(width => 8, init=>0xC0, poly=>0x31);
                               my $crc_digest = $calc_crc8->add( pack 'H*', substr( $rawData, 4, 28 ) )->digest;
@@ -1852,7 +1806,7 @@ sub SD_WS_Parse {
         sendmode   => sub {my (undef,$bitData) = @_; return substr($bitData,9,1) eq "1" ? "manual" : "auto"; },
         channel    => sub {my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11); },
         temp       => sub {my (undef,$bitData) = @_; return ((SD_WS_binaryToNumber($bitData,12,23) - 500) / 10.0); },
-        crcok      => sub {my $msg = shift;
+        crcok      => sub {my ($msg,undef,$name) = @_;
                            my @n = split //, $msg;
                            my $sum1 = hex($n[0]) + hex($n[2]) + hex($n[4]) + 6;
                            my $sum2 = hex($n[1]) + hex($n[3]) + hex($n[5]) + 6 + ($sum1 >> 4);
@@ -1911,7 +1865,7 @@ sub SD_WS_Parse {
                             return ($winddirraw * 22.5, $winddirtxtar[$winddirraw]);
                           },
         bat        => sub { my (undef,$bitData) = @_; return substr($bitData,85,1) eq '0' ? 'ok' : 'low'; },
-        crcok      => sub { my (undef,$bitData) = @_;
+        crcok      => sub { my (undef,$bitData,$name,$msg) = @_;
                             my $sum = 170 + 165; # preamble 0xAA + 0xA5
                             for (my $n = 0; $n < 88; $n += 8) {
                               $sum += SD_WS_binaryToNumber($bitData, $n, $n + 7)
@@ -1925,7 +1879,63 @@ sub SD_WS_Parse {
                           },
         count      => sub { my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,96,103); },
     },
-  );
+  };
+}
+
+#############################
+sub SD_WS_Parse {
+  my ($iohash, $msg) = @_;
+  carp "SD_WS_Parse, too few arguments ($iohash, $msg)" if @_ < 2;
+  my $name = $iohash->{NAME};
+  my $ioname = $iohash->{NAME};
+  my ($protocol,$rawData) = split("#",$msg);
+  $protocol=~ s/^[WP](\d+)/$1/; # extract protocol
+  my $decodingSubs = $modules{SD_WS}{decodingSubs};  # built once in SD_WS_Initialize
+  my $dummyreturnvalue= "Unknown, please report";
+  my $hlen = length($rawData);
+  my $blen = $hlen * 4;
+  my $bitData = unpack("B$blen", pack("H$hlen", $rawData));
+  my $bitData2;
+  my $model;  # wenn im elsif Abschnitt definiert, dann wird der Sensor per AutoCreate angelegt
+  my $modelStat; # for FHEM statistics https://fhem.de/stats/statistics.html
+  my $state = '';
+  my $SensorTyp;
+  my $id;
+  my $bat;
+  my $batChange;
+  my $batVoltage;
+  my $batteryPercent;
+  my $sendmode;
+  my $channel;
+  my $rawTemp;
+  my $temp;
+  my $temp2;
+  my $temp3;
+  my $temp4;
+  my $hum;
+  my $windspeed;
+  my $winddir;
+  my $winddirtxt;
+  my $windgust;
+  my $trend;
+  my $trendTemp;
+  my $trendHum;
+  my $rain;
+  my $rain_total;
+  my $rawRainCounter;
+  my $sendCounter;
+  my $beep;
+  my $distance;
+  my $uv;
+  my $adc;
+  my $brightness;
+  my $count;
+  my $identified;
+  my $transmitter;
+  my $dcf;
+  my $dcfStatus;
+  my $pm2_5; # particulate matter <= 2.5 µm
+  my $pm10;  # particulate matter <= 10 µm
 
   Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, rawData $rawData";
 
@@ -2236,55 +2246,56 @@ sub SD_WS_Parse {
 
   }
 
-  elsif (defined($decodingSubs{$protocol}))   # durch den hash decodieren
+  elsif (defined($decodingSubs->{$protocol}))   # durch den hash decodieren
   {
-    $SensorTyp=$decodingSubs{$protocol}{sensortype};
-    if (!$decodingSubs{$protocol}{prematch}->( $rawData )) { 
+    my $decoder = $decodingSubs->{$protocol};   # resolve the protocol subtree once
+    $SensorTyp=$decoder->{sensortype};
+    if (!$decoder->{prematch}->( $rawData,$bitData,$name,$msg )) { 
       Log3 $iohash, 4, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR prematch" ;
       return "";
     }
-    my $retcrc=$decodingSubs{$protocol}{crcok}->( $rawData,$bitData );
+    my $retcrc=$decoder->{crcok}->( $rawData,$bitData,$name,$msg );
     if (!$retcrc) {
       Log3 $iohash, 4, "$name: SD_WS_Parse $rawData protocolid $protocol ($SensorTyp) - ERROR CRC";
       return "";
     }
-    $id = $decodingSubs{$protocol}{id}->( $rawData,$bitData );
-    $temp = $decodingSubs{$protocol}{temp}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{temp}));
-    $temp2 = $decodingSubs{$protocol}{temp2}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{temp2}));
-    $temp3 = $decodingSubs{$protocol}{temp3}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{temp3}));
-    $temp4 = $decodingSubs{$protocol}{temp4}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{temp4}));
-    $hum = $decodingSubs{$protocol}{hum}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{hum}));
-    $windspeed = $decodingSubs{$protocol}{windspeed}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{windspeed}));
-    ($winddir,$winddirtxt) = $decodingSubs{$protocol}{winddir}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{winddir}));
-    $windgust = $decodingSubs{$protocol}{windgust}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{windgust}));
-    $channel = $decodingSubs{$protocol}{channel}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{channel}));
-    $model = $decodingSubs{$protocol}{model};
-    $modelStat = $decodingSubs{$protocol}{modelStat}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{modelStat}));
-    $bat = $decodingSubs{$protocol}{bat}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{bat}));
-    $batVoltage = $decodingSubs{$protocol}{batVoltage}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{batVoltage}));
-    $batChange = $decodingSubs{$protocol}{batChange}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{batChange}));
-    $batteryPercent = $decodingSubs{$protocol}{batteryPercent}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{batteryPercent}));
-    $rawRainCounter = $decodingSubs{$protocol}{rawRainCounter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rawRainCounter}));
-    $rain = $decodingSubs{$protocol}{rain}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rain}));
-    $rain_total = $decodingSubs{$protocol}{rain_total}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{rain_total}));
-    $sendCounter = $decodingSubs{$protocol}{sendCounter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendCounter}));
-    $beep = $decodingSubs{$protocol}{beep}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{beep}));
-    $adc = $decodingSubs{$protocol}{adc}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{adc}));
+    $id = $decoder->{id}->( $rawData,$bitData,$name,$msg );
+    $temp = $decoder->{temp}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{temp}));
+    $temp2 = $decoder->{temp2}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{temp2}));
+    $temp3 = $decoder->{temp3}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{temp3}));
+    $temp4 = $decoder->{temp4}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{temp4}));
+    $hum = $decoder->{hum}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{hum}));
+    $windspeed = $decoder->{windspeed}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{windspeed}));
+    ($winddir,$winddirtxt) = $decoder->{winddir}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{winddir}));
+    $windgust = $decoder->{windgust}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{windgust}));
+    $channel = $decoder->{channel}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{channel}));
+    $model = $decoder->{model};
+    $modelStat = $decoder->{modelStat}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{modelStat}));
+    $bat = $decoder->{bat}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{bat}));
+    $batVoltage = $decoder->{batVoltage}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{batVoltage}));
+    $batChange = $decoder->{batChange}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{batChange}));
+    $batteryPercent = $decoder->{batteryPercent}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{batteryPercent}));
+    $rawRainCounter = $decoder->{rawRainCounter}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{rawRainCounter}));
+    $rain = $decoder->{rain}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{rain}));
+    $rain_total = $decoder->{rain_total}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{rain_total}));
+    $sendCounter = $decoder->{sendCounter}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{sendCounter}));
+    $beep = $decoder->{beep}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{beep}));
+    $adc = $decoder->{adc}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{adc}));
     if ($model eq "SD_WS_33_T" || $model eq "SD_WS_58_T") {      # for SD_WS_33 or SD_WS_58 discrimination T - TH
-      $model = $decodingSubs{$protocol}{model}."H" if $hum != 0; # for models with Humidity
+      $model = $decoder->{model}."H" if $hum != 0; # for models with Humidity
     }
-    $sendmode = $decodingSubs{$protocol}{sendmode}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{sendmode}));
-    $trend = $decodingSubs{$protocol}{trend}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{trend}));
-    $distance = $decodingSubs{$protocol}{distance}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{distance}));
-    $count = $decodingSubs{$protocol}{count}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{count}));
-    $identified = $decodingSubs{$protocol}{identified}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{identified}));
-    $uv = $decodingSubs{$protocol}{uv}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{uv}));
-    $brightness = $decodingSubs{$protocol}{brightness}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{brightness}));
-    $transmitter = $decodingSubs{$protocol}{transmitter}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{transmitter}));
-    $dcf = $decodingSubs{$protocol}{dcf}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{dcf}));
-    $dcfStatus = $decodingSubs{$protocol}{dcfStatus}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{dcfStatus}));
-    $pm2_5 = $decodingSubs{$protocol}{pm_2_5}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{pm_2_5}));
-    $pm10 = $decodingSubs{$protocol}{pm_10}->( $rawData,$bitData ) if (exists($decodingSubs{$protocol}{pm_10}));
+    $sendmode = $decoder->{sendmode}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{sendmode}));
+    $trend = $decoder->{trend}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{trend}));
+    $distance = $decoder->{distance}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{distance}));
+    $count = $decoder->{count}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{count}));
+    $identified = $decoder->{identified}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{identified}));
+    $uv = $decoder->{uv}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{uv}));
+    $brightness = $decoder->{brightness}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{brightness}));
+    $transmitter = $decoder->{transmitter}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{transmitter}));
+    $dcf = $decoder->{dcf}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{dcf}));
+    $dcfStatus = $decoder->{dcfStatus}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{dcfStatus}));
+    $pm2_5 = $decoder->{pm_2_5}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{pm_2_5}));
+    $pm10 = $decoder->{pm_10}->( $rawData,$bitData,$name,$msg ) if (exists($decoder->{pm_10}));
     Log3 $iohash, 4, "$name: SD_WS_Parse decoded protocol-id $protocol ($SensorTyp), sensor-id $id";
   }
   else {
