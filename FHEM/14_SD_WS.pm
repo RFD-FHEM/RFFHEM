@@ -58,6 +58,7 @@
 # 09.01.2025 Protokoll 125: Ergänzung Empfang DCF-Daten WH31E/DNT000005
 # 22.04.2025 neues Protokoll 135: Temperatursensor TFA 30.3255.02
 # 09.02.2026 neues Protokoll 136: Wind-, Temperatur- und Feuchtigkeitssensor EMOS E06016 mit DCF77
+# 19.09.2026 Dekodiertabelle wird einmal beim Laden des Moduls erzeugt und im Modul-Hash gehalten
 
 package main;
 
