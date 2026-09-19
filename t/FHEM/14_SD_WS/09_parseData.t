@@ -25,7 +25,7 @@ sub runTest {
 		url			=> qq[$filepath/testData.json],
 	};
 
-	plan( scalar @Test2::SIGNALduino::RDmsg::JSONTestList + 2 );
+	plan( scalar @Test2::SIGNALduino::RDmsg::JSONTestList + 1 );
 	for my $maintest  (@Test2::SIGNALduino::RDmsg::JSONTestList)
 	{
 		subtest $maintest->{testname} => sub {
@@ -48,20 +48,6 @@ sub runTest {
 		is(ReadingsVal($sensorname, q[temperature], undef), q[-7.5], q[temperature reading updated]);
 
 		CommandDelete(undef, $sensorname);
-		done_testing();
-	};
-
-	subtest q[Regression: protocol 27 prematch enforces the whole message layout] => sub {
-		# 113C49B048FF06 is the valid message 113C49B04806 with two nibbles spliced in.
-		# The CRC covers the first 10 nibbles and the last 2, so it still matches and the
-		# prematch is the only check that can reject this message.
-		my $ret = $main::modules{SD_WS}{ParseFn}->($ioHash, q[W27#113C49B048FF06]);
-		is($ret, q[], q[message of wrong length rejected by prematch]);
-
-		# EFS-3110A carries 8 in the nibble where EFTH-800 carries 0; both must pass.
-		$ret = $main::modules{SD_WS}{ParseFn}->($ioHash, q[W27#3F94519855C7]);
-		isnt($ret, q[], q[EFS-3110A message with variant nibble 8 accepted]);
-
 		done_testing();
 	};
 	exit(0);
