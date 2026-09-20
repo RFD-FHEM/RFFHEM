@@ -78,6 +78,62 @@
                   "comment" : "#3"
                }
             ]
+         },
+         {
+            "comment" : "EuroChron EFS-3110A / Channel 4, variant nibble 8 (issue #889)",
+            "dmsg" : "W27#3F94519855C7",
+            "internals" : {
+               "DEF" : "SD_WS_27_TH_4",
+               "NAME" : "SD_WS_27_TH_4"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "4",
+               "humidity" : "55",
+               "state" : "T: 28.1 H: 55",
+               "temperature" : "28.1",
+               "type" : "EFTH-800, EFS-3110A"
+            },
+            "rmsg" : "MU;P0=-220;P1=273;P2=-447;P3=515;P4=-4840;P5=762;P6=-697;D=01230121212303030303012123012303030121230303012121212121212121230123012123012301212301230301230121212303030303012123014565656561212303030303030301212301230121212301230121212303012123030121212123012301230123030301212123030301;CP=1;R=22;",
+            "tests" : [
+               {
+                  "comment" : "#4"
+               }
+            ]
+         },
+         {
+            "comment" : "EuroChron EFS-3110A / Channel 4, variant nibble 8 (issue #889)",
+            "dmsg" : "W27#3F9451685379",
+            "internals" : {
+               "DEF" : "SD_WS_27_TH_4",
+               "NAME" : "SD_WS_27_TH_4"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "4",
+               "humidity" : "53",
+               "state" : "T: 27.8 H: 53",
+               "temperature" : "27.8",
+               "type" : "EFTH-800, EFS-3110A"
+            },
+            "rmsg" : "MU;P0=-221;P1=272;P2=-456;P3=512;P4=-4852;P5=751;P6=-708;D=01230121212121212121212303012303030121230303012301230121212121212121212123012301212301230301230121212121212121212303014565656561212303030303030301212301230121212301230121212301230301230121212123012301212303012303030301212301;CP=1;R=25;",
+            "tests" : [
+               {
+                  "comment" : "#5"
+               }
+            ]
+         },
+         {
+            "comment" : "EuroChron weatherstation EFTH-800 - wrong message length, CRC still matches",
+            "dmsg" : "W27#113C49B048FF06",
+            "tests" : [
+               {
+                  "returns" : {
+                     "ParseFn" : ""
+                  },
+                  "comment" : "#6"
+               }
+            ]
          }
       ],
       "id" : "27",

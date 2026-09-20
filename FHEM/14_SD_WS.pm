@@ -59,6 +59,7 @@
 # 22.04.2025 neues Protokoll 135: Temperatursensor TFA 30.3255.02
 # 09.02.2026 neues Protokoll 136: Wind-, Temperatur- und Feuchtigkeitssensor EMOS E06016 mit DCF77
 # 19.09.2026 Dekodiertabelle wird einmal beim Laden des Moduls erzeugt und im Modul-Hash gehalten
+# 20.09.2026 Protokoll 27: fehlerhafter prematch korrigiert, Testdaten für EFS-3110A ergänzt
 
 package main;
 
@@ -233,7 +234,7 @@ sub SD_WS_DecodingSubs {
         sensortype => 'EFTH-800, EFS-3110A',
         model      => 'SD_WS_27_TH',
         # prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{7}0[0-9]{2}[0-9A-F]{2}$/); }, # prematch 113C49A 0 47 AE (EFTH-800)
-        prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{7}0|8[0-9]{2}[0-9A-F]{2}$/); }, # prematch 3F94519 8 55 C7 (EFS-3110A)
+        prematch   => sub {my $rawData = shift; return 1 if ($rawData =~ /^[0-9A-F]{7}[08][0-9]{2}[0-9A-F]{2}$/); }, # prematch 3F94519 8 55 C7 (EFS-3110A)
         channel    => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,1,3) + 1 ); },
         id         => sub {my ($rawData,undef) = @_; return substr($rawData,1,3); },
         bat        => sub {my (undef,$bitData) = @_; return substr($bitData,16,1) eq "0" ? "ok" : "low";},
