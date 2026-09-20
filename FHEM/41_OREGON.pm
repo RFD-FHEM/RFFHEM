@@ -1,5 +1,5 @@
 #################################################################################
-# $Id: 41_OREGON.pm 0 2026-09-20 14:44:18Z sidey79 $
+# $Id: 41_OREGON.pm 0 2026-09-20 19:50:34Z sidey79 $
 #
 # Module for FHEM to decode Oregon sensor messages
 #
