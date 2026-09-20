@@ -30,7 +30,7 @@ sub SD_WS_Maverick_Initialize
 {
   my ($hash) = @_;
 
-  $hash->{Match}     = "^P47#[A-Fa-f0-9]+";
+  $hash->{Match}     = qr/^P47#[A-Fa-f0-9]+/s;
   $hash->{DefFn}     = \&SD_WS_Maverick_Define;
   $hash->{UndefFn}   = \&SD_WS_Maverick_Undef;
   $hash->{ParseFn}   = \&SD_WS_Maverick_Parse;

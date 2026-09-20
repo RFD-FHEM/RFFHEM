@@ -38,7 +38,7 @@ use FHEM::Meta;
 sub SD_WS07_Initialize
 {
   my ($hash) = @_;
-  $hash->{Match}     = "^P7#[A-Fa-f0-9]{6}[AFaf][A-Fa-f0-9]{2,3}";    ## pos 7 ist aktuell immer 0xF oder 0xA
+  $hash->{Match}     = qr/^P7#[A-Fa-f0-9]{6}[AFaf][A-Fa-f0-9]{2,3}/s;    ## pos 7 ist aktuell immer 0xF oder 0xA
   $hash->{DefFn}     = \&SD_WS07_Define;
   $hash->{UndefFn}   = \&SD_WS07_Undef;
   $hash->{ParseFn}   = \&SD_WS07_Parse;

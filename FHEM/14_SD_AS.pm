@@ -46,7 +46,7 @@ SD_AS_Initialize
   # 10 raw
   # ..31 
 
-  $hash->{Match}     = "^P2#[A-Fa-f0-9]{7,8}";
+  $hash->{Match}     = qr/^P2#[A-Fa-f0-9]{7,8}/s;
   $hash->{DefFn}     = \&SD_AS_Define;
   $hash->{UndefFn}   = \&SD_AS_Undef;
   $hash->{ParseFn}   = \&SD_AS_Parse;

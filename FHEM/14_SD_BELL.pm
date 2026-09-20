@@ -100,7 +100,7 @@ my %models = (
 
 sub SD_BELL_Initialize {
   my ($hash) = @_;
-  $hash->{Match}      = '^P(?:15|32|41|42|57|79|96|98|112)#.*';
+  $hash->{Match}      = qr/^P(?:15|32|41|42|57|79|96|98|112)#.*/s;
   $hash->{DefFn}      = \&SD_BELL::Define;
   $hash->{UndefFn}    = \&SD_BELL::Undef;
   $hash->{ParseFn}    = \&SD_BELL::Parse;

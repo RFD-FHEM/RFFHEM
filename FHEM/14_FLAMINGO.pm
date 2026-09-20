@@ -51,7 +51,7 @@ my %models = (
 sub FLAMINGO_Initialize {
   my ($hash) = @_;
 
-  $hash->{Match}     = '^P13\.?1?#[A-Fa-f0-9]+';
+  $hash->{Match}     = qr/^P13\.?1?#[A-Fa-f0-9]+/s;
   $hash->{SetFn}     = \&FLAMINGO_Set;
   $hash->{DefFn}     = \&FLAMINGO_Define;
   $hash->{UndefFn}   = \&FLAMINGO_Undef;
