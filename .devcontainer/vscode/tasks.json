@@ -6,10 +6,10 @@
         {
             "label": "run prove FHEM module tests",
             "type": "shell",
+            "command": "FHEM_PROVE_OPTIONS='${input:proveOptions}' bash .devcontainer/scripts/run-selected-tests.sh fhem ${input:dynamicFHEMModuleFilesRemembered}",
             "options": {
-                "cwd": "/opt/fhem/"
+                "cwd": "${workspaceFolder}"
             },
-            "command": "clear; prove ${input:proveOptions} -I FHEM -r --exec 'perl fhem.pl -t' ${input:dynamicFHEMModuleFilesRemembered}",
             "problemMatcher": {
                 "owner": "TAP",
                 "fileLocation": "relative",
@@ -33,10 +33,10 @@
         {
             "label": "run proove all FHEM tests",
             "type": "shell",
+            "command": "FHEM_PROVE_OPTIONS='${input:proveOptions}' bash .devcontainer/scripts/run-selected-tests.sh fhem",
             "options": {
-                "cwd": "/opt/fhem/"
+                "cwd": "${workspaceFolder}"
             },
-            "command": "clear; prove ${input:proveOptions} -I FHEMM -r --exec 'perl fhem.pl -t' ${workspaceFolder}/t/FHEM/[0-9][0-9]*",
             "problemMatcher": {
                 "owner": "TAP",
                 "fileLocation": "relative",
@@ -60,7 +60,10 @@
         {
             "label": "run prove Perl module files",
             "type": "shell",
-            "command": "clear; prove ${input:proveOptions} --exec 'perl -I lib -I FHEM'  -r ${input:dynamicPERLModuleFilesRemembered}",
+            "command": "FHEM_PROVE_OPTIONS='${input:proveOptions}' bash .devcontainer/scripts/run-selected-tests.sh perl ${input:dynamicPERLModuleFilesRemembered}",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
             "problemMatcher": {
                 "owner": "TAP",
                 "fileLocation": "relative",
@@ -84,10 +87,10 @@
         {
             "label": "run prove active file FHEM module test",
             "type": "shell",
+            "command": "FHEM_PROVE_OPTIONS='${input:proveOptions}' bash .devcontainer/scripts/run-active-test.sh fhem ${file}",
             "options": {
-                "cwd": "/opt/fhem/"
+                "cwd": "${workspaceFolder}"
             },
-            "command": "prove ${input:proveOptions} -I FHEM -r --exec 'perl fhem.pl -t' ${file}",
             "problemMatcher": {
                 "owner": "TAP",
                 "fileLocation": "relative",
@@ -111,7 +114,109 @@
         {
             "label": "run prove active file Perl module test",
             "type": "shell",
-            "command": "prove ${input:proveOptions} --exec 'perl -I lib -I FHEM' -r ${file}",
+            "command": "FHEM_PROVE_OPTIONS='${input:proveOptions}' bash .devcontainer/scripts/run-active-test.sh perl ${file}",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": {
+                "owner": "TAP",
+                "fileLocation": "relative",
+                "pattern": [
+                    {
+                        "regexp": "^#\\s+(Failed test '.*')",
+                        "message": 1
+                    },
+                    {
+                        "regexp": "^#\\s+at (.*) line (\\d+)",
+                        "line": 2,
+                        "file": 1
+                    }
+                ]
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "run SVN checkout",
+            "type": "shell",
+            "command": "bash .devcontainer/scripts/svn-checkout.sh",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "sync module to SVN",
+            "type": "shell",
+            "command": "bash .devcontainer/scripts/sync-module-to-svn.sh",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "FHEM: run all tests",
+            "type": "shell",
+            "command": "FHEM_PROVE_OPTIONS='${input:proveOptions}' bash .devcontainer/scripts/run-all-tests.sh",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": {
+                "owner": "TAP",
+                "fileLocation": "relative",
+                "pattern": [
+                    {
+                        "regexp": "^#\\s+(Failed test '.*')",
+                        "message": 1
+                    },
+                    {
+                        "regexp": "^#\\s+at (.*) line (\\d+)",
+                        "line": 2,
+                        "file": 1
+                    }
+                ]
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "FHEM: run single test",
+            "type": "shell",
+            "command": "FHEM_PROVE_OPTIONS='${input:proveOptions}' bash .devcontainer/scripts/run-single-test.sh ${input:testFile}",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": {
+                "owner": "TAP",
+                "fileLocation": "relative",
+                "pattern": [
+                    {
+                        "regexp": "^#\\s+(Failed test '.*')",
+                        "message": 1
+                    },
+                    {
+                        "regexp": "^#\\s+at (.*) line (\\d+)",
+                        "line": 2,
+                        "file": 1
+                    }
+                ]
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "FHEM: pick and run test",
+            "type": "shell",
+            "command": "bash .devcontainer/scripts/pick-fhem-test.sh",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
             "problemMatcher": {
                 "owner": "TAP",
                 "fileLocation": "relative",
@@ -135,14 +240,10 @@
     ],
     "inputs":  [
         {
-            "id": "dynamicFHEMModuleFiles",
-            "type": "command",
-            "command": "extension.commandvariable.file.pickFile",
-            "args": {
-                "include": "t/FHEM/[0-9][0-9]*/*.{t}",
-                "multiPick" : true,
-                "keyRemember"  : "pickFHEMModuleFile"
-            }
+            "id": "testFile",
+            "type": "promptString",
+            "description": "Path to the .t test file, relative to the repo test root",
+            "default": "path/to/test.t"
         },
         {
             "id": "proveOptions",
@@ -169,20 +270,20 @@
             "type": "command",
             "command": "extension.commandvariable.pickStringRemember",
             "args": {
-                "description": "Testfiles",
+                "description": "FHEM module tests",
                 "options": [
                     ["Use previous selection", "${remember:FHEMTestFiles}"],
-                    ["pick tests", "${pickFile:FHEMMModuleFile}"] 
-                 ],
+                    ["Pick tests", "${pickFile:FHEMModuleFile}"]
+                ],
                 "key": "FHEMTestFiles",
-                "multiPick" : true,
+                "multiPick": true,
                 "rememberTransformed": true,
                 "pickFile": {
-                    "FHEMMModuleFile": {
-                        "description": "Which Testfiles to run?",
+                    "FHEMModuleFile": {
+                        "description": "Which FHEM tests should run?",
                         "include": "t/FHEM/[0-9][0-9]*/**/*.{t}",
-                        "multiPick" : true,
-                        "keyRemember": "FHEMMModuleFile"
+                        "multiPick": true,
+                        "keyRemember": "FHEMModuleFile"
                     }
                 }
             }
@@ -192,21 +293,21 @@
             "type": "command",
             "command": "extension.commandvariable.pickStringRemember",
             "args": {
-                "description": "Testfiles",
+                "description": "Perl module tests",
                 "options": [
                     ["Use previous selection", "${remember:PERLTestFiles}"],
-                    ["pick tests", "${pickFile:PERLMModuleFile}"] 
-                 ],
+                    ["Pick tests", "${pickFile:PERLModuleFile}"]
+                ],
                 "key": "PERLTestFiles",
-                "multiPick" : true,
+                "multiPick": true,
                 "rememberTransformed": true,
                 "pickFile": {
-                    "PERLMModuleFile": {
-                        "description": "Which Testfiles to run?",
+                    "PERLModuleFile": {
+                        "description": "Which Perl tests should run?",
                         "include": "t/**/*.{t}",
                         "exclude": "t/FHEM/[0-9][0-9]*",
-                        "multiPick" : true,
-                        "keyRemember": "PERLMModuleFile"
+                        "multiPick": true,
+                        "keyRemember": "PERLModuleFile"
                     }
                 }
             }
