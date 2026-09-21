@@ -373,7 +373,7 @@ sub SD_WS_DecodingSubs {
     },
     #Log3 $name, 4, "$name: SD_WS37 decoded protocol = $protocol ($SensorTyp), sensor id = $id, channel = $channel";       
     38 =>
-      {
+    {
         # Protokollbeschreibung: NC-3911, NC-3912 - Rosenstein & Soehne Digitales Kuehl- und Gefrierschrank-Thermometer
         # -------------------------------------------------------------------------------------------------------------
         # 0    4    | 8    12   | 16   20   | 24   28   | 32
@@ -406,7 +406,132 @@ sub SD_WS_DecodingSubs {
                             return 0;
                            }
                           },
-      } ,
+    },
+    44 => {   # BresserTemeo
+              #   # Protokollbeschreibung:
+              #   # https://github.com/merbanan/rtl_433_tests/tree/master/tests/bresser_3ch
+              #   # The data is grouped in 5 bytes / 10 nibbles
+              #   # ------------------------------------------------------------------------
+              #   # 0         | 8    12   | 16        | 24        | 32
+              #   # 1111 1100 | 0001 0110 | 0001 0000 | 0011 0111 | 0101 1001 0  65.1 F 55 %
+              #   # iiii iiii | bscc tttt | tttt tttt | hhhh hhhh | xxxx xxxx
+              #   # i: 8 bit random id (changes on power-loss)
+              #   # b: battery indicator (0=>OK, 1=>LOW)
+              #   # s: Test/Sync (0=>Normal, 1=>Test-Button pressed / Sync)
+              #   # c: Channel (MSB-first, valid channels are 1-3)
+              #   # t: Temperature (MSB-first, Big-endian)
+              #   #    12 bit unsigned fahrenheit offset by 90 and scaled by 10
+              #   # h: Humidity (MSB-first) 8 bit relative humidity percentage
+              #   # x: checksum (byte1 + byte2 + byte3 + byte4) % 256
+              #   #    Check with e.g. (byte1 + byte2 + byte3 + byte4 - byte5) % 256) = 0
+          sensortype => 'BresserTemeo',
+          model      => 'BresserTemeo',
+          prematch   => sub { return 0 if (length($_[1]) != 72);
+                              Log3 $_[2], 4, "$_[2]: SD_WS_Parse BresserTemeo length error (72 bits expected)!!!";
+                              
+                              my $isXvariant = $_[3] =~ /^[WP]\d+x/; # "x" suffix in the original message marks Humidity > 79
+
+                              my $humgle;
+                              if ( !$isXvariant ) {
+                                $_[1] = '0'.$_[1];
+                                $humgle = '<=';
+                              } else { 
+                                $_[1] = '1'.$_[1];
+                                $humgle = '>=';
+                              }
+                              Log3 $_[2], 4, "$_[2]: SD_WS_Parse BresserTemeo Humidity $humgle 79  Flag";
+                              Log3 $_[2], 4, "$_[2]: SD_WS_Parse BresserTemeo new bin $_[1]";
+                              return 1;
+                            },
+          crcok      => sub { return 1 },
+          id         => sub {  my (undef,$binData,$name) = @_;
+                               my $id = SD_WS_binaryToNumber($binData, 13, 19);
+                               my $checkId = SD_WS_binaryToNumber($binData, 45, 51) ^ 0b1111111;
+                              if ($id != $checkId)
+                              {
+                                Log3 $name, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Id";
+                                return
+                              }
+                              return $id;
+                            },
+          temp       => sub {   my ($undef,$bitData,$name) = @_;
+                                my $temp1Dec = SD_WS_binaryToNumber($bitData, 21, 23);
+                                my $temp2Dec = SD_WS_binaryToNumber($bitData, 24, 27);
+                                my $temp3Dec = SD_WS_binaryToNumber($bitData, 28, 31);
+                                my $checkTemp1 = SD_WS_binaryToNumber($bitData, 53, 55) ^ 0b111;
+                                my $checkTemp2 = SD_WS_binaryToNumber($bitData, 56, 59) ^ 0b1111;
+                                my $checkTemp3 = SD_WS_binaryToNumber($bitData, 60, 63) ^ 0b1111;
+                                if ($checkTemp1 != $temp1Dec || $checkTemp2 != $temp2Dec || $checkTemp3 != $temp3Dec)
+                                {
+                                  Log3 $name, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Temperature";
+                                  return ;
+                                }
+                                my $temp = $temp1Dec.$temp2Dec.".".$temp3Dec;
+                                $temp +=0; # remove leading zeros
+                                if ($temp > 60)
+                                {
+                                  Log3 $name, 4, "$name: SD_WS_Parse BresserTemeo Temperature Error. temp=$temp";
+                                  return "";
+                                }
+                                my $sign = substr($bitData,12,1);
+                                my $checkSign = substr($bitData,44,1) ^ 0b1;
+                                if ($sign != $checkSign) 
+                                {
+                                  Log3 $name, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Sign";
+                                } else {
+                                  if ($sign)
+                                  {
+                                    $temp = 0 - $temp;
+                                  }
+                                  return $temp;
+                                }
+                            },
+          channel    => sub { 
+                              my (undef,$binData,$name) = @_;
+                              my $channel = SD_WS_binaryToNumber($binData, 10, 11);
+                              my $checkChannel = SD_WS_binaryToNumber($binData, 42, 43) ^ 0b11;
+
+                              if ($channel != $checkChannel)
+                              {
+                                Log3 $name, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Channel";
+                                return ;
+                              }
+                              return $channel;
+                            },
+          bat        => sub {  
+                              my (undef,$bitData,$name) = @_;
+                              my $bat = substr($bitData,9,1);
+                              my $checkBat = substr($bitData,41,1) ^ 0b1;
+                              if ($bat != $checkBat)
+                              {
+                                Log3 $name, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Bat";
+                                return ;
+                              }
+                              else
+                              {
+                                return ($bat == 0) ? "ok" : "low";
+                              }
+                            },
+          hum        => sub { my (undef,$bitData,$name) = @_;
+                              my $hum1Dec = SD_WS_binaryToNumber($bitData, 0, 3);
+                              my $hum2Dec = SD_WS_binaryToNumber($bitData, 4, 7);
+                              my $checkHum1 = SD_WS_binaryToNumber($bitData, 32, 35) ^ 0b1111;
+                              my $checkHum2 = SD_WS_binaryToNumber($bitData, 36, 39) ^ 0b1111;
+                              if ($checkHum1 != $hum1Dec || $checkHum2 != $hum2Dec)
+                              {
+                                Log3 $name, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Humidity";
+                                return ;
+                              } else {
+                                my $hum = $hum1Dec.$hum2Dec;
+                                if ($hum < 1 || $hum > 100)
+                                {
+                                  Log3 $name, 4, "$name: SD_WS_Parse BresserTemeo Humidity Error. Humidity=$hum";
+                                  return ;
+                                }
+                                return $hum;
+                              }
+                            }
+    },
     48 => ## Funk-Thermometer JOKER TFA 30.3055, Temperatursender 30.3212
           # FF489034FF10
           # PPFIITTTPPCC
@@ -718,7 +843,7 @@ sub SD_WS_DecodingSubs {
                               $_[1] = unpack("B$blen", pack("H$hlen", $_[0]));
                               $temptyp = substr($_[1],0,8);
                             }
-                            if( $temptyp ne '11111111' ) {
+                            if( $temptyp ne '11111111' ) { 
                               Log3 $_[2], 4, "$_[2]: SD_WS_WH2 Error kein WH2: Typ: $temptyp" ;
                               return 0;
                             }
@@ -2050,7 +2175,7 @@ sub SD_WS_Parse {
   my $name = $iohash->{NAME};
   my $ioname = $iohash->{NAME};
   my ($protocol,$rawData) = split("#",$msg);
-  $protocol=~ s/^[WP](\d+)/$1/; # extract protocol
+  $protocol=~ s/^[WP](\d+)x?/$1/; # extract protocol, dropping an optional trailing 'x' (see Match regex) so e.g. "44x" still resolves to decodingSubs key 44
   my $decodingSubs = $modules{SD_WS}{decodingSubs};  # built once in SD_WS_Initialize
   my $dummyreturnvalue= "Unknown, please report";
   my $hlen = length($rawData);
@@ -2100,174 +2225,7 @@ sub SD_WS_Parse {
 
   Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, rawData $rawData";
 
-  # if ($protocol eq "37") {    # Bresser 7009994
-  #   # Protokollbeschreibung:
-  #   # https://github.com/merbanan/rtl_433_tests/tree/master/tests/bresser_3ch
-  #   # The data is grouped in 5 bytes / 10 nibbles
-  #   # ------------------------------------------------------------------------
-  #   # 0         | 8    12   | 16        | 24        | 32
-  #   # 1111 1100 | 0001 0110 | 0001 0000 | 0011 0111 | 0101 1001 0  65.1 F 55 %
-  #   # iiii iiii | bscc tttt | tttt tttt | hhhh hhhh | xxxx xxxx
-  #   # i: 8 bit random id (changes on power-loss)
-  #   # b: battery indicator (0=>OK, 1=>LOW)
-  #   # s: Test/Sync (0=>Normal, 1=>Test-Button pressed / Sync)
-  #   # c: Channel (MSB-first, valid channels are 1-3)
-  #   # t: Temperature (MSB-first, Big-endian)
-  #   #    12 bit unsigned fahrenheit offset by 90 and scaled by 10
-  #   # h: Humidity (MSB-first) 8 bit relative humidity percentage
-  #   # x: checksum (byte1 + byte2 + byte3 + byte4) % 256
-  #   #    Check with e.g. (byte1 + byte2 + byte3 + byte4 - byte5) % 256) = 0
-
-  #   $model = "SD_WS37_TH";
-  #   $SensorTyp = "Bresser 7009994";
-  #   my $checksum = (SD_WS_binaryToNumber($bitData,0,7) + SD_WS_binaryToNumber($bitData,8,15) + SD_WS_binaryToNumber($bitData,16,23) + SD_WS_binaryToNumber($bitData,24,31)) & 0xFF;
-  #   if ($checksum != SD_WS_binaryToNumber($bitData,32,39)) {
-  #     Log3 $name, 4, "$name: SD_WS37 ERROR - checksum $checksum != ".SD_WS_binaryToNumber($bitData,32,39);
-  #     return "";
-  #   } else {
-  #     Log3 $name, 4, "$name: SD_WS37 checksum ok $checksum = ".SD_WS_binaryToNumber($bitData,32,39);
-  #     $id = substr($rawData,0,2);
-  #     $bat = int(substr($bitData,8,1)) eq "0" ? "ok" : "low";   # Batterie-Bit konnte nicht geprueft werden
-  #     $channel = SD_WS_binaryToNumber($bitData,10,11);
-  #     $rawTemp =  SD_WS_binaryToNumber($bitData,12,23);
-  #     $hum = SD_WS_binaryToNumber($bitData,24,31);
-  #     my $tempFh = $rawTemp / 10 - 90;              # Grad Fahrenheit
-  #     $temp = (($tempFh - 32) * 5 / 9);             # Grad Celsius
-  #     $temp = sprintf("%.1f", $temp + 0.05);        # round
-  #     Log3 $name, 4, "$name: SD_WS37 tempraw = $rawTemp, temp = $tempFh F, temp = $temp C, Hum = $hum";
-  #     Log3 $name, 4, "$name: SD_WS37 decoded protocol = $protocol ($SensorTyp), sensor id = $id, channel = $channel";
-  #   }
-  # }
-  if  ($protocol eq "44" || $protocol eq "44x")  # BresserTemeo
-  {
-    # 0    4    8    12       20   24   28   32   36   40   44       52   56   60
-    # 0101 0111 1001 00010101 0010 0100 0001 1010 1000 0110 11101010 1101 1011 1110 110110010
-    # hhhh hhhh ?bcc viiiiiii sttt tttt tttt xxxx xxxx ?BCC VIIIIIII Syyy yyyy yyyy
-
-    # - h humidity / -x checksum
-    # - t temp     / -y checksum
-    # - c Channel  / -C checksum
-    # - V sign     / -V checksum
-    # - i 7 bit random id (aendert sich beim Batterie- und Kanalwechsel)  / - I checksum
-    # - b battery indicator (0=>OK, 1=>LOW)               / - B checksum
-    # - s Test/Sync (0=>Normal, 1=>Test-Button pressed)   / - S checksum
-
-    $model= "BresserTemeo";
-    $SensorTyp = "BresserTemeo";
-
-    #my $binvalue = unpack("B*" ,pack("H*", $rawData));
-    my $binvalue = $bitData;
-
-    if (length($binvalue) != 72) {
-      Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo length error (72 bits expected)!!!";
-      return "";
-    }
-
-    # Check what Humidity Prefix (*sigh* Bresser!!!) 
-    if ($protocol eq "44")
-    {
-      $binvalue = "0".$binvalue;
-      Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo Humidity <= 79  Flag";
-    }
-    else
-    {
-      $binvalue = "1".$binvalue;
-      Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo Humidity > 79  Flag";
-    }
-
-    Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo new bin $binvalue";
-
-    my $checksumOkay = 1;
-
-    my $hum1Dec = SD_WS_binaryToNumber($binvalue, 0, 3);
-    my $hum2Dec = SD_WS_binaryToNumber($binvalue, 4, 7);
-    my $checkHum1 = SD_WS_binaryToNumber($binvalue, 32, 35) ^ 0b1111;
-    my $checkHum2 = SD_WS_binaryToNumber($binvalue, 36, 39) ^ 0b1111;
-
-    if ($checkHum1 != $hum1Dec || $checkHum2 != $hum2Dec)
-    {
-      Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Humidity";
-    }
-    else
-    {
-      $hum = $hum1Dec.$hum2Dec;
-      if ($hum < 1 || $hum > 100)
-      {
-        Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo Humidity Error. Humidity=$hum";
-        return "";
-      }
-    }
-
-    my $temp1Dec = SD_WS_binaryToNumber($binvalue, 21, 23);
-    my $temp2Dec = SD_WS_binaryToNumber($binvalue, 24, 27);
-    my $temp3Dec = SD_WS_binaryToNumber($binvalue, 28, 31);
-    my $checkTemp1 = SD_WS_binaryToNumber($binvalue, 53, 55) ^ 0b111;
-    my $checkTemp2 = SD_WS_binaryToNumber($binvalue, 56, 59) ^ 0b1111;
-    my $checkTemp3 = SD_WS_binaryToNumber($binvalue, 60, 63) ^ 0b1111;
-    $temp = $temp1Dec.$temp2Dec.".".$temp3Dec;
-    $temp +=0; # remove leading zeros
-    if ($checkTemp1 != $temp1Dec || $checkTemp2 != $temp2Dec || $checkTemp3 != $temp3Dec)
-    {
-      Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Temperature";
-      $checksumOkay = 0;
-    }
-    if ($temp > 60)
-    {
-      Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo Temperature Error. temp=$temp";
-      return "";
-    }
-
-    my $sign = substr($binvalue,12,1);
-    my $checkSign = substr($binvalue,44,1) ^ 0b1;
-
-    if ($sign != $checkSign) 
-    {
-      Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Sign";
-      $checksumOkay = 0;
-    }
-    else
-    {
-      if ($sign)
-      {
-        $temp = 0 - $temp;
-      }
-    }
-
-    $bat = substr($binvalue,9,1);
-    my $checkBat = substr($binvalue,41,1) ^ 0b1;
-
-    if ($bat != $checkBat)
-    {
-      Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Bat";
-      $bat = undef;
-    }
-    else
-    {
-      $bat = ($bat == 0) ? "ok" : "low";
-    }
-
-    $channel = SD_WS_binaryToNumber($binvalue, 10, 11);
-    my $checkChannel = SD_WS_binaryToNumber($binvalue, 42, 43) ^ 0b11;
-    $id = SD_WS_binaryToNumber($binvalue, 13, 19);
-    my $checkId = SD_WS_binaryToNumber($binvalue, 45, 51) ^ 0b1111111;
-
-    if ($channel != $checkChannel || $id != $checkId)
-    {
-      Log3 $iohash, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Channel or Id";
-      $checksumOkay = 0;
-    }
-
-    if ($checksumOkay == 0)
-    {
-      Log3 $iohash, 4, "$name:SD_WS_Parse BresserTemeo checksum error!!! These Values seem incorrect: temp=$temp, channel=$channel, id=$id";
-      return "";
-    }
-
-    $id = sprintf('%02X', $id);           # wandeln nach hex
-    Log3 $iohash, 4, "$name: SD_WS_Parse model=$model, temp=$temp, hum=$hum, channel=$channel, id=$id, bat=$bat";
-
-  } 
-  elsif (defined($decodingSubs->{$protocol}))   # durch den hash decodieren
+  if (defined($decodingSubs->{$protocol}))   # durch den hash decodieren
   {
     my $decoder = $decodingSubs->{$protocol};   # resolve the protocol subtree once
     $SensorTyp=$decoder->{sensortype};
