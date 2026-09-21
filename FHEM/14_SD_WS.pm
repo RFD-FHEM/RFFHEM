@@ -322,7 +322,56 @@ sub SD_WS_DecodingSubs {
       hum     => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,30,33)*16 + SD_WS_binaryToNumber($bitData,26,29));  },           #hum
       channel => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,12,13)+1 );  },   # channel
       bat     => sub {my (undef,$bitData) = @_; return substr($bitData,34,1) eq "0" ? "ok" : "low";},   # other or modul orginal
-       } ,
+     },
+    37 => {
+        # Protokollbeschreibung:
+        # https://github.com/merbanan/rtl_433_tests/tree/master/tests/bresser_3ch
+        # The data is grouped in 5 bytes / 10 nibbles
+        # ------------------------------------------------------------------------
+        # 0         | 8    12   | 16        | 24        | 32
+        # 1111 1100 | 0001 0110 | 0001 0000 | 0011 0111 | 0101 1001 0  65.1 F 55 %
+        # iiii iiii | bscc tttt | tttt tttt | hhhh hhhh | xxxx xxxx
+        # i: 8 bit random id (changes on power-loss)
+        # b: battery indicator (0=>OK, 1=>LOW)
+        # s: Test/Sync (0=>Normal, 1=>Test-Button pressed / Sync)
+        # c: Channel (MSB-first, valid channels are 1-3)
+        # t: Temperature (MSB-first, Big-endian)
+        #    12 bit unsigned fahrenheit offset by 90 and scaled by 10
+        # h: Humidity (MSB-first) 8 bit relative humidity percentage
+        # x: checksum (byte1 + byte2 + byte3 + byte4) % 256
+        #    Check with e.g. (byte1 + byte2 + byte3 + byte4 - byte5) % 256) = 0
+        sensortype => 'Bresser 7009994',
+        model      => 'SD_WS37_TH',
+        prematch   => sub { return 1; }, # no precheck known
+        crcok      => sub  {
+                        my (undef,$bitData,$name) = @_;
+                        my $checksum = (SD_WS_binaryToNumber($bitData,0,7) + SD_WS_binaryToNumber($bitData,8,15) + SD_WS_binaryToNumber($bitData,16,23) + SD_WS_binaryToNumber($bitData,24,31)) & 0xFF;
+                        if ($checksum != SD_WS_binaryToNumber($bitData,32,39)) {
+                          return 0;
+                        }
+                        Log3 $name, 4, "$name: SD_WS37 checksum ok $checksum = ".SD_WS_binaryToNumber($bitData,32,39);
+                        return 1;
+                      },
+        temp      => sub { 
+                            my (undef,$bitData,$name) = @_; 
+                            my $rawTemp =  SD_WS_binaryToNumber($bitData,12,23);
+                            my $tempFh = $rawTemp / 10 - 90;              # Grad Fahrenheit
+                            my $temp = (($tempFh - 32) * 5 / 9);             # Grad Celsius
+                            $temp = sprintf("%.1f", $temp + 0.05);        # round
+                            Log3 $name, 4, "$name: SD_WS37 tempraw = $rawTemp, temp = $tempFh F, temp = $temp C";
+                            return $temp;
+                    },
+        hum       => sub { 
+                           my (undef,$bitData,$name) = @_; 
+                           my $hum = SD_WS_binaryToNumber($bitData,24,31);
+                           Log3 $name, 4, "$name: SD_WS37 hum = $hum %";
+                           return $hum;
+                        },
+        channel   => sub { my (undef,$bitData) = @_; return SD_WS_binaryToNumber($bitData,10,11); },
+        id        => sub { my ($rawData,undef) = @_; return substr($rawData,0,2); },
+        bat       => sub { my (undef,$bitData) = @_; return int(substr($bitData,8,1)) eq "0" ? "ok" : "low";    }, # Batterie-Bit konnte nicht geprueft werden
+    },
+    #Log3 $name, 4, "$name: SD_WS37 decoded protocol = $protocol ($SensorTyp), sensor id = $id, channel = $channel";       
     38 =>
       {
         # Protokollbeschreibung: NC-3911, NC-3912 - Rosenstein & Soehne Digitales Kuehl- und Gefrierschrank-Thermometer
@@ -1942,45 +1991,45 @@ sub SD_WS_Parse {
 
   Log3 $name, 4, "$name: SD_WS_Parse protocol $protocol, rawData $rawData";
 
-  if ($protocol eq "37") {    # Bresser 7009994
-    # Protokollbeschreibung:
-    # https://github.com/merbanan/rtl_433_tests/tree/master/tests/bresser_3ch
-    # The data is grouped in 5 bytes / 10 nibbles
-    # ------------------------------------------------------------------------
-    # 0         | 8    12   | 16        | 24        | 32
-    # 1111 1100 | 0001 0110 | 0001 0000 | 0011 0111 | 0101 1001 0  65.1 F 55 %
-    # iiii iiii | bscc tttt | tttt tttt | hhhh hhhh | xxxx xxxx
-    # i: 8 bit random id (changes on power-loss)
-    # b: battery indicator (0=>OK, 1=>LOW)
-    # s: Test/Sync (0=>Normal, 1=>Test-Button pressed / Sync)
-    # c: Channel (MSB-first, valid channels are 1-3)
-    # t: Temperature (MSB-first, Big-endian)
-    #    12 bit unsigned fahrenheit offset by 90 and scaled by 10
-    # h: Humidity (MSB-first) 8 bit relative humidity percentage
-    # x: checksum (byte1 + byte2 + byte3 + byte4) % 256
-    #    Check with e.g. (byte1 + byte2 + byte3 + byte4 - byte5) % 256) = 0
+  # if ($protocol eq "37") {    # Bresser 7009994
+  #   # Protokollbeschreibung:
+  #   # https://github.com/merbanan/rtl_433_tests/tree/master/tests/bresser_3ch
+  #   # The data is grouped in 5 bytes / 10 nibbles
+  #   # ------------------------------------------------------------------------
+  #   # 0         | 8    12   | 16        | 24        | 32
+  #   # 1111 1100 | 0001 0110 | 0001 0000 | 0011 0111 | 0101 1001 0  65.1 F 55 %
+  #   # iiii iiii | bscc tttt | tttt tttt | hhhh hhhh | xxxx xxxx
+  #   # i: 8 bit random id (changes on power-loss)
+  #   # b: battery indicator (0=>OK, 1=>LOW)
+  #   # s: Test/Sync (0=>Normal, 1=>Test-Button pressed / Sync)
+  #   # c: Channel (MSB-first, valid channels are 1-3)
+  #   # t: Temperature (MSB-first, Big-endian)
+  #   #    12 bit unsigned fahrenheit offset by 90 and scaled by 10
+  #   # h: Humidity (MSB-first) 8 bit relative humidity percentage
+  #   # x: checksum (byte1 + byte2 + byte3 + byte4) % 256
+  #   #    Check with e.g. (byte1 + byte2 + byte3 + byte4 - byte5) % 256) = 0
 
-    $model = "SD_WS37_TH";
-    $SensorTyp = "Bresser 7009994";
-    my $checksum = (SD_WS_binaryToNumber($bitData,0,7) + SD_WS_binaryToNumber($bitData,8,15) + SD_WS_binaryToNumber($bitData,16,23) + SD_WS_binaryToNumber($bitData,24,31)) & 0xFF;
-    if ($checksum != SD_WS_binaryToNumber($bitData,32,39)) {
-      Log3 $name, 4, "$name: SD_WS37 ERROR - checksum $checksum != ".SD_WS_binaryToNumber($bitData,32,39);
-      return "";
-    } else {
-      Log3 $name, 4, "$name: SD_WS37 checksum ok $checksum = ".SD_WS_binaryToNumber($bitData,32,39);
-      $id = substr($rawData,0,2);
-      $bat = int(substr($bitData,8,1)) eq "0" ? "ok" : "low";   # Batterie-Bit konnte nicht geprueft werden
-      $channel = SD_WS_binaryToNumber($bitData,10,11);
-      $rawTemp =  SD_WS_binaryToNumber($bitData,12,23);
-      $hum = SD_WS_binaryToNumber($bitData,24,31);
-      my $tempFh = $rawTemp / 10 - 90;              # Grad Fahrenheit
-      $temp = (($tempFh - 32) * 5 / 9);             # Grad Celsius
-      $temp = sprintf("%.1f", $temp + 0.05);        # round
-      Log3 $name, 4, "$name: SD_WS37 tempraw = $rawTemp, temp = $tempFh F, temp = $temp C, Hum = $hum";
-      Log3 $name, 4, "$name: SD_WS37 decoded protocol = $protocol ($SensorTyp), sensor id = $id, channel = $channel";
-    }
-  }
-  elsif  ($protocol eq "44" || $protocol eq "44x")  # BresserTemeo
+  #   $model = "SD_WS37_TH";
+  #   $SensorTyp = "Bresser 7009994";
+  #   my $checksum = (SD_WS_binaryToNumber($bitData,0,7) + SD_WS_binaryToNumber($bitData,8,15) + SD_WS_binaryToNumber($bitData,16,23) + SD_WS_binaryToNumber($bitData,24,31)) & 0xFF;
+  #   if ($checksum != SD_WS_binaryToNumber($bitData,32,39)) {
+  #     Log3 $name, 4, "$name: SD_WS37 ERROR - checksum $checksum != ".SD_WS_binaryToNumber($bitData,32,39);
+  #     return "";
+  #   } else {
+  #     Log3 $name, 4, "$name: SD_WS37 checksum ok $checksum = ".SD_WS_binaryToNumber($bitData,32,39);
+  #     $id = substr($rawData,0,2);
+  #     $bat = int(substr($bitData,8,1)) eq "0" ? "ok" : "low";   # Batterie-Bit konnte nicht geprueft werden
+  #     $channel = SD_WS_binaryToNumber($bitData,10,11);
+  #     $rawTemp =  SD_WS_binaryToNumber($bitData,12,23);
+  #     $hum = SD_WS_binaryToNumber($bitData,24,31);
+  #     my $tempFh = $rawTemp / 10 - 90;              # Grad Fahrenheit
+  #     $temp = (($tempFh - 32) * 5 / 9);             # Grad Celsius
+  #     $temp = sprintf("%.1f", $temp + 0.05);        # round
+  #     Log3 $name, 4, "$name: SD_WS37 tempraw = $rawTemp, temp = $tempFh F, temp = $temp C, Hum = $hum";
+  #     Log3 $name, 4, "$name: SD_WS37 decoded protocol = $protocol ($SensorTyp), sensor id = $id, channel = $channel";
+  #   }
+  # }
+  if  ($protocol eq "44" || $protocol eq "44x")  # BresserTemeo
   {
     # 0    4    8    12       20   24   28   32   36   40   44       52   56   60
     # 0101 0111 1001 00010101 0010 0100 0001 1010 1000 0110 11101010 1101 1011 1110 110110010
