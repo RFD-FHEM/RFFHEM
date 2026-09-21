@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS_Maverick.pm 26979 2023-01-09 19:54:08Z sidey79 $
+# $Id: 14_SD_WS_Maverick.pm 0 2026-09-20 19:50:34Z sidey79 $
 # 
 # The purpose of this module is to support Maverick sensors
 # Sidey79 & Cruizer 2016
@@ -30,7 +30,7 @@ sub SD_WS_Maverick_Initialize
 {
   my ($hash) = @_;
 
-  $hash->{Match}     = "^P47#[A-Fa-f0-9]+";
+  $hash->{Match}     = qr/^P47#[A-Fa-f0-9]+/s;
   $hash->{DefFn}     = \&SD_WS_Maverick_Define;
   $hash->{UndefFn}   = \&SD_WS_Maverick_Undef;
   $hash->{ParseFn}   = \&SD_WS_Maverick_Parse;
