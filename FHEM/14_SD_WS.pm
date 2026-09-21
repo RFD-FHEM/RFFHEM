@@ -1,4 +1,4 @@
-# $Id: 14_SD_WS.pm 0 2026-07-12 09:24:40Z elektron-bbs $
+# $Id: 14_SD_WS.pm 0 2026-09-20 19:50:34Z sidey79 $
 #
 # The purpose of this module is to support serval
 # weather sensors which use various protocol
@@ -60,6 +60,7 @@
 # 09.02.2026 neues Protokoll 136: Wind-, Temperatur- und Feuchtigkeitssensor EMOS E06016 mit DCF77
 # 19.09.2026 Dekodiertabelle wird einmal beim Laden des Moduls erzeugt und im Modul-Hash gehalten
 # 20.09.2026 Protokoll 27: fehlerhafter prematch korrigiert, Testdaten für EFS-3110A ergänzt
+# 20.09.2026 Match-Regex vorkompiliert (qr//), damit FHEM sie nicht je Nachricht neu übersetzt
 
 package main;
 
@@ -79,7 +80,7 @@ sub SD_WS_WH2SHIFT;
 
 sub SD_WS_Initialize {
   my $hash = shift // return;
-  $hash->{Match}    = '^W\d+x{0,1}#.*';
+  $hash->{Match}    = qr/^W\d+x{0,1}#.*/s;
   $hash->{DefFn}    = \&SD_WS_Define;
   $hash->{UndefFn}  = \&SD_WS_Undef;
   $hash->{SetFn}    = \&SD_WS_Set;

@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_WS09.pm 26980 2023-01-23 17:24:05Z sidey79 $
+# $Id: 14_SD_WS09.pm 0 2026-09-20 19:50:34Z sidey79 $
 # 
 # The purpose of this module is to support serval 
 # weather sensors like WS-0101  (Sender 868MHz ASK   Epmfänger RX868SH-DV elv)
@@ -31,7 +31,7 @@ use FHEM::Core::Utils::Math;
 sub SD_WS09_Initialize {
 	my ($hash) = @_;
 
-	$hash->{Match}     = "^P9#F[A-Fa-f0-9]+";    ## pos 7 ist aktuell immer 0xF
+	$hash->{Match}     = qr/^P9#F[A-Fa-f0-9]+/s;    ## pos 7 ist aktuell immer 0xF
 	$hash->{DefFn}     = \&SD_WS09_Define;
 	$hash->{UndefFn}   = \&SD_WS09_Undef;
 	$hash->{ParseFn}   = \&SD_WS09_Parse;

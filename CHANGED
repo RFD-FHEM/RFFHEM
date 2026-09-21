@@ -1,3 +1,6 @@
+2026-09-21 - Merge pull request #1404 from RFD-FHEM/perf/match-precompiled-regex
+
+perf: precompile the Match regex in all modules of this repo
 2026-09-18 - Merge pull request #1401 from RFD-FHEM/feat/esp-http-flash
 
 feat: ESP8266 und ESP32 über HTTP flashen
