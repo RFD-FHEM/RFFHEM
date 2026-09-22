@@ -1,5 +1,5 @@
 #################################################################
-# $Id: 10_SD_GT.pm 27957 2024-01-03 12:07:45Z sidey79 $
+# $Id: 10_SD_GT.pm 0 2026-09-20 19:50:34Z sidey79 $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is to support remote controls with QUIGG Gt-9000 protocol (based on code quigg_gt9000.c from pilight)
@@ -47,7 +47,7 @@ sub Initialize {
   $hash->{UndefFn}    = \&Undef;
   $hash->{SetFn}      = \&Set;
   $hash->{ParseFn}    = \&Parse;
-  $hash->{Match}      = '^P49#[A-Fa-f0-9]+';
+  $hash->{Match}      = qr/^P49#[A-Fa-f0-9]+/s;
   $hash->{AttrList}   = "IODev repeats:1,2,3,4,5,6,7,8,9,12,15 showtime:0,1 disableSetAllFunction:0,1 do_not_notify:0,1 ignore:0,1 showtime:0,1 $main::readingFnAttributes";
   $hash->{AutoCreate} = {'SD_GT_LEARN' => {FILTER => '%NAME', autocreateThreshold => '5:180', GPLOT => q{}}};
   return FHEM::Meta::InitMod( __FILE__, $hash );

@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 14_SD_AS.pm 350 2024-03-11 20:44:20Z sidey79 $
+# $Id: 14_SD_AS.pm 0 2026-09-20 19:50:34Z sidey79 $
 # The file is part of the SIGNALduino project
 # see http://www.fhemwiki.de/wiki/SIGNALduino
 # and was created to provide support for self build sensors.
@@ -46,7 +46,7 @@ SD_AS_Initialize
   # 10 raw
   # ..31 
 
-  $hash->{Match}     = "^P2#[A-Fa-f0-9]{7,8}";
+  $hash->{Match}     = qr/^P2#[A-Fa-f0-9]{7,8}/s;
   $hash->{DefFn}     = \&SD_AS_Define;
   $hash->{UndefFn}   = \&SD_AS_Undef;
   $hash->{ParseFn}   = \&SD_AS_Parse;

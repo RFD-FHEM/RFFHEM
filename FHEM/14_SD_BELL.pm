@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: 14_SD_BELL.pm 0 2026-02-18 22:40:03Z sidey79 $
+# $Id: 14_SD_BELL.pm 0 2026-09-20 19:50:34Z sidey79 $
 #
 # The file is part of the SIGNALduino project.
 # The purpose of this module is to support many wireless BELL devices.
@@ -100,7 +100,7 @@ my %models = (
 
 sub SD_BELL_Initialize {
   my ($hash) = @_;
-  $hash->{Match}      = '^P(?:15|32|41|42|57|79|96|98|112)#.*';
+  $hash->{Match}      = qr/^P(?:15|32|41|42|57|79|96|98|112)#.*/s;
   $hash->{DefFn}      = \&SD_BELL::Define;
   $hash->{UndefFn}    = \&SD_BELL::Undef;
   $hash->{ParseFn}    = \&SD_BELL::Parse;

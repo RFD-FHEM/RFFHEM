@@ -1,5 +1,5 @@
 #################################################################################
-# $Id: 41_OREGON.pm 26978 2023-01-28 15:26:11Z elektron-bbs $
+# $Id: 41_OREGON.pm 0 2026-09-20 19:50:34Z sidey79 $
 #
 # Module for FHEM to decode Oregon sensor messages
 #
@@ -53,7 +53,7 @@ sub OREGON_Initialize
 {
   my ($hash) = @_;
 
-  $hash->{Match}     = "^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*", #38-78
+  $hash->{Match}     = qr/^(3[8-9A-F]|[4-6][0-9A-F]|7[0-8]).*/s, #38-78
   $hash->{DefFn}     = \&OREGON_Define;
   $hash->{UndefFn}   = \&OREGON_Undef;
   $hash->{ParseFn}   = \&OREGON_Parse;

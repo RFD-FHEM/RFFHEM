@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 10_FS10.pm 26984 2023-01-06 12:07:45Z sidey79 $
+# $Id: 10_FS10.pm 0 2026-09-20 19:50:34Z sidey79 $
 #
 # FS10 basierend auf dem FS20 Modul angepasst fuer SIGNALduino, elektron-bbs
 #
@@ -79,7 +79,7 @@ sub Initialize {
 	for my $k (keys %codes) {
 		$fs10_c2b{$codes{$k}} = $k; # reverse codes
 	}
-	$hash->{Match}      = '^P61#[a-fA-F0-9]{8,12}';
+	$hash->{Match}      = qr/^P61#[a-fA-F0-9]{8,12}/s;
 	$hash->{SetFn}      = \&Set;
 	$hash->{DefFn}      = \&Define;
 	$hash->{UndefFn}    = \&Undef;
