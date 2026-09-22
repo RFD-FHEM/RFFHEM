@@ -323,7 +323,7 @@ sub SD_WS_DecodingSubs {
       channel => sub {my (undef,$bitData) = @_; return (SD_WS_binaryToNumber($bitData,12,13)+1 );  },   # channel
       bat     => sub {my (undef,$bitData) = @_; return substr($bitData,34,1) eq "0" ? "ok" : "low";},   # other or modul orginal
      },
-    37 => {
+    37 => {  # Bresser 7009994 
         # Protokollbeschreibung:
         # https://github.com/merbanan/rtl_433_tests/tree/master/tests/bresser_3ch
         # The data is grouped in 5 bytes / 10 nibbles
@@ -347,6 +347,7 @@ sub SD_WS_DecodingSubs {
                         my (undef,$bitData,$name) = @_;
                         my $checksum = (SD_WS_binaryToNumber($bitData,0,7) + SD_WS_binaryToNumber($bitData,8,15) + SD_WS_binaryToNumber($bitData,16,23) + SD_WS_binaryToNumber($bitData,24,31)) & 0xFF;
                         if ($checksum != SD_WS_binaryToNumber($bitData,32,39)) {
+                          Log3 $name, 4, "$name: SD_WS37 ERROR - checksum $checksum != ".SD_WS_binaryToNumber($bitData,32,39);
                           return 0;
                         }
                         Log3 $name, 4, "$name: SD_WS37 checksum ok $checksum = ".SD_WS_binaryToNumber($bitData,32,39);
@@ -408,22 +409,17 @@ sub SD_WS_DecodingSubs {
                           },
     },
     44 => {   # BresserTemeo
-              #   # Protokollbeschreibung:
-              #   # https://github.com/merbanan/rtl_433_tests/tree/master/tests/bresser_3ch
-              #   # The data is grouped in 5 bytes / 10 nibbles
-              #   # ------------------------------------------------------------------------
-              #   # 0         | 8    12   | 16        | 24        | 32
-              #   # 1111 1100 | 0001 0110 | 0001 0000 | 0011 0111 | 0101 1001 0  65.1 F 55 %
-              #   # iiii iiii | bscc tttt | tttt tttt | hhhh hhhh | xxxx xxxx
-              #   # i: 8 bit random id (changes on power-loss)
-              #   # b: battery indicator (0=>OK, 1=>LOW)
-              #   # s: Test/Sync (0=>Normal, 1=>Test-Button pressed / Sync)
-              #   # c: Channel (MSB-first, valid channels are 1-3)
-              #   # t: Temperature (MSB-first, Big-endian)
-              #   #    12 bit unsigned fahrenheit offset by 90 and scaled by 10
-              #   # h: Humidity (MSB-first) 8 bit relative humidity percentage
-              #   # x: checksum (byte1 + byte2 + byte3 + byte4) % 256
-              #   #    Check with e.g. (byte1 + byte2 + byte3 + byte4 - byte5) % 256) = 0
+          # 0    4    8    12       20   24   28   32   36   40   44       52   56   60
+          # 0101 0111 1001 00010101 0010 0100 0001 1010 1000 0110 11101010 1101 1011 1110 110110010
+          # hhhh hhhh ?bcc viiiiiii sttt tttt tttt xxxx xxxx ?BCC VIIIIIII Syyy yyyy yyyy
+
+          # - h humidity / -x checksum
+          # - t temp     / -y checksum
+          # - c Channel  / -C checksum
+          # - V sign     / -V checksum
+          # - i 7 bit random id (aendert sich beim Batterie- und Kanalwechsel)  / - I checksum
+          # - b battery indicator (0=>OK, 1=>LOW)               / - B checksum
+          # - s Test/Sync (0=>Normal, 1=>Test-Button pressed)   / - S checksum
           sensortype => 'BresserTemeo',
           model      => 'BresserTemeo',
           prematch   => sub { return 0 if (length($_[1]) != 72);
@@ -437,7 +433,7 @@ sub SD_WS_DecodingSubs {
                                 $humgle = '<=';
                               } else { 
                                 $_[1] = '1'.$_[1];
-                                $humgle = '>=';
+                                $humgle = '>';
                               }
                               Log3 $_[2], 4, "$_[2]: SD_WS_Parse BresserTemeo Humidity $humgle 79  Flag";
                               Log3 $_[2], 4, "$_[2]: SD_WS_Parse BresserTemeo new bin $_[1]";
