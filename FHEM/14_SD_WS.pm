@@ -825,30 +825,32 @@ sub SD_WS_DecodingSubs {
                           }, # prematch
         modelStat  => sub { return (length($_[0]) == 14) ? 'WH2A' : 'WH2' ; },
         crcok      => sub { my ($rawData,undef,$name,$msg) = @_;
-                            return 1 if (length($rawData) != 14); # WH2 without checksum
                             if (HAS_DigestCRC) {
                               my $rr2 = SD_WS_WH2CRCCHECK($rawData);
                               if ($rr2 == 0 ){
-                                my $checksum = 1;
-                                for (my $i = 0; $i < 12; $i += 2) {
-                                  $checksum += hex(substr($rawData, $i, 2));
-                                }
-                                $checksum &= 0xFF;
-                                my $checksum1 = hex(substr($rawData, 12, 2));
-                                if ($checksum != $checksum1) {
-                                  Log3 $name, 3, qq[$name: SD_WS_WH2 Parse msg $rawData - ERROR checksum $checksum != $checksum1];
-                                  return 0;
-                                }                              
+                                Log3 $name, 4, "$name: SD_WS_WH2 CRC_OK   : CRC=$rr2 msg: $msg check:".$rawData ;
                               } else {
                                 Log3 $name, 3, "$name: SD_WS_WH2 Parse msg $msg - ERROR CRC=$rr2 check:".$rawData ;
                                 return 0;
                               }
-                              return 1;
                             } else {
                               Log3 $name, 1, "$name: SD_WS_WH2 Parse msg $msg - ERROR CRC not checked, please install module Digest::CRC" ;
                               return 0;
                             }
-                            
+                            if (length($rawData) == 14) # WH2a with checksum
+                            {
+                              my $checksum = 1;
+                              for (my $i = 0; $i < 12; $i += 2) {
+                                $checksum += hex(substr($rawData, $i, 2));
+                              }
+                              $checksum &= 0xFF;
+                              my $checksum1 = hex(substr($rawData, 12, 2));
+                              if ($checksum != $checksum1) {
+                                Log3 $name, 3, qq[$name: SD_WS_WH2 Parse msg $rawData - ERROR checksum $checksum != $checksum1];
+                                return 0;
+                              }                              
+                            }
+                            return 1;
                           },
         id         => sub { my (undef,$bitData) = @_; return sprintf('%03X', SD_WS_bin2dec(substr($bitData,12,6))); }, # id
         bat        => sub { my (undef,$bitData) = @_; return substr($bitData,32,1) eq "1" ? "low" : "ok";},
