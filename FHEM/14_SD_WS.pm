@@ -439,29 +439,37 @@ sub SD_WS_DecodingSubs {
                               Log3 $_[2], 4, "$_[2]: SD_WS_Parse BresserTemeo new bin $_[1]";
                               return 1;
                             },
-          crcok      => sub { return 1 },
-          id         => sub {  my (undef,$binData,$name) = @_;
-                               my $id = SD_WS_binaryToNumber($binData, 13, 19);
-                               my $checkId = SD_WS_binaryToNumber($binData, 45, 51) ^ 0b1111111;
-                              if ($id != $checkId)
-                              {
-                                Log3 $name, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Id";
-                                return
+          crcok      => sub {
+                              my (undef,$bitData,$name) = @_;
+                              # each field's checksum bit is the field itself, inverted, 32 bits later
+                              my @fields = (
+                                ['Humidity',    0,  8],
+                                ['Channel',    10,  2],
+                                ['Bat',         9,  1],
+                                ['Id',         13,  7],
+                                ['Sign',       12,  1],
+                                ['Temperature',21, 11],
+                              );
+                              for my $field (@fields) {
+                                my ($label, $start, $width) = @$field;
+                                my $mask  = (1 << $width) - 1;
+                                my $value = SD_WS_binaryToNumber($bitData, $start, $start + $width - 1);
+                                my $check = SD_WS_binaryToNumber($bitData, $start + 32, $start + $width + 31) ^ $mask;
+                                if ($value != $check)
+                                {
+                                  Log3 $name, 4, "$name: SD_WS_Parse BresserTemeo checksum error in $label";
+                                  return 0;
+                                }
                               }
-                              return $id;
+                              return 1;
+                            },
+          id         => sub {  my (undef,$binData,$name) = @_;
+                               return SD_WS_binaryToNumber($binData, 13, 19);
                             },
           temp       => sub {   my ($undef,$bitData,$name) = @_;
                                 my $temp1Dec = SD_WS_binaryToNumber($bitData, 21, 23);
                                 my $temp2Dec = SD_WS_binaryToNumber($bitData, 24, 27);
                                 my $temp3Dec = SD_WS_binaryToNumber($bitData, 28, 31);
-                                my $checkTemp1 = SD_WS_binaryToNumber($bitData, 53, 55) ^ 0b111;
-                                my $checkTemp2 = SD_WS_binaryToNumber($bitData, 56, 59) ^ 0b1111;
-                                my $checkTemp3 = SD_WS_binaryToNumber($bitData, 60, 63) ^ 0b1111;
-                                if ($checkTemp1 != $temp1Dec || $checkTemp2 != $temp2Dec || $checkTemp3 != $temp3Dec)
-                                {
-                                  Log3 $name, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Temperature";
-                                  return ;
-                                }
                                 my $temp = $temp1Dec.$temp2Dec.".".$temp3Dec;
                                 $temp +=0; # remove leading zeros
                                 if ($temp > 60)
@@ -470,62 +478,31 @@ sub SD_WS_DecodingSubs {
                                   return "";
                                 }
                                 my $sign = substr($bitData,12,1);
-                                my $checkSign = substr($bitData,44,1) ^ 0b1;
-                                if ($sign != $checkSign) 
+                                if ($sign)
                                 {
-                                  Log3 $name, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Sign";
-                                } else {
-                                  if ($sign)
-                                  {
-                                    $temp = 0 - $temp;
-                                  }
-                                  return $temp;
+                                  $temp = 0 - $temp;
                                 }
+                                return $temp;
                             },
-          channel    => sub { 
+          channel    => sub {
                               my (undef,$binData,$name) = @_;
-                              my $channel = SD_WS_binaryToNumber($binData, 10, 11);
-                              my $checkChannel = SD_WS_binaryToNumber($binData, 42, 43) ^ 0b11;
-
-                              if ($channel != $checkChannel)
-                              {
-                                Log3 $name, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Channel";
-                                return ;
-                              }
-                              return $channel;
+                              return SD_WS_binaryToNumber($binData, 10, 11);
                             },
-          bat        => sub {  
+          bat        => sub {
                               my (undef,$bitData,$name) = @_;
                               my $bat = substr($bitData,9,1);
-                              my $checkBat = substr($bitData,41,1) ^ 0b1;
-                              if ($bat != $checkBat)
-                              {
-                                Log3 $name, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Bat";
-                                return ;
-                              }
-                              else
-                              {
-                                return ($bat == 0) ? "ok" : "low";
-                              }
+                              return ($bat == 0) ? "ok" : "low";
                             },
           hum        => sub { my (undef,$bitData,$name) = @_;
                               my $hum1Dec = SD_WS_binaryToNumber($bitData, 0, 3);
                               my $hum2Dec = SD_WS_binaryToNumber($bitData, 4, 7);
-                              my $checkHum1 = SD_WS_binaryToNumber($bitData, 32, 35) ^ 0b1111;
-                              my $checkHum2 = SD_WS_binaryToNumber($bitData, 36, 39) ^ 0b1111;
-                              if ($checkHum1 != $hum1Dec || $checkHum2 != $hum2Dec)
+                              my $hum = $hum1Dec.$hum2Dec;
+                              if ($hum < 1 || $hum > 100)
                               {
-                                Log3 $name, 4, "$name: SD_WS_Parse BresserTemeo checksum error in Humidity";
+                                Log3 $name, 4, "$name: SD_WS_Parse BresserTemeo Humidity Error. Humidity=$hum";
                                 return ;
-                              } else {
-                                my $hum = $hum1Dec.$hum2Dec;
-                                if ($hum < 1 || $hum > 100)
-                                {
-                                  Log3 $name, 4, "$name: SD_WS_Parse BresserTemeo Humidity Error. Humidity=$hum";
-                                  return ;
-                                }
-                                return $hum;
                               }
+                              return $hum;
                             }
     },
     48 => ## Funk-Thermometer JOKER TFA 30.3055, Temperatursender 30.3212
