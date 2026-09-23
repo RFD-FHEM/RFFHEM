@@ -566,6 +566,638 @@
                   "comment" : "#0"
                }
             ]
+         },
+         {
+            "comment" : "27.7C / 75%, Channel 2, ID 16 - reale SIGNALduino MU-Rohaufnahme",
+            "dmsg" : "W44#EB4204EF14BDFB1114",
+            "internals" : {
+               "DEF" : "BresserTemeo_2",
+               "NAME" : "BresserTemeo_2"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "2",
+               "humidity" : "75",
+               "state" : "T: 27.7 H: 75",
+               "temperature" : "27.7",
+               "type" : "BresserTemeo"
+            },
+            "rmsg" : "MU;P0=1955;P1=-1954;P2=3972;P3=-3910;D=01012303030301030103030103010101010301010101010103010103030301030303030101010301030101030103030303010303030303030103030101010301010103010101030103010;CP=0;",
+            "tests" : [
+               {
+                  "comment" : "#1"
+               }
+            ]
+         },
+         {
+            "comment" : "28.2C / 88%, Channel 2, ID 16 - x-Variante (Feuchte >79%), reale SIGNALduino MU-Rohaufnahme",
+            "dmsg" : "W44x#11420504EEBDFAFB1C",
+            "internals" : {
+               "DEF" : "BresserTemeo_2",
+               "NAME" : "BresserTemeo_2"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "2",
+               "humidity" : "88",
+               "state" : "T: 28.2 H: 88",
+               "temperature" : "28.2",
+               "type" : "BresserTemeo"
+            },
+            "rmsg" : "MU;P0=-304;P1=1954;P2=-1953;P3=-3906;P4=3976;P5=-5800;D=012134512121213121212131213121212121312121212121213121312121212121312121313131213131312131213131313121313131313131213121313131313121313121212131313121;CP=1;",
+            "tests" : [
+               {
+                  "comment" : "#2"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 3, ID 64 - x-Variante (Feuchte >79%)",
+            "dmsg" : "W44x#126804F2ED97FB0CA6",
+            "internals" : {
+               "DEF" : "BresserTemeo_3",
+               "NAME" : "BresserTemeo_3"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "3",
+               "humidity" : "89",
+               "state" : "T: 27.9 H: 89",
+               "temperature" : "27.9",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#3"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 3, ID 64 - x-Variante (Feuchte >79%)",
+            "dmsg" : "W44x#0E680500F197FAFFEA",
+            "internals" : {
+               "DEF" : "BresserTemeo_3",
+               "NAME" : "BresserTemeo_3"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "3",
+               "humidity" : "87",
+               "state" : "T: 28 H: 87",
+               "temperature" : "28",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#4"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 3, ID 64 - x-Variante (Feuchte >79%)",
+            "dmsg" : "W44x#026804EEFD97FB11FE",
+            "internals" : {
+               "DEF" : "BresserTemeo_3",
+               "NAME" : "BresserTemeo_3"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "3",
+               "humidity" : "81",
+               "state" : "T: 27.7 H: 81",
+               "temperature" : "27.7",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#5"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 1, ID 60",
+            "dmsg" : "W44#F02784ED0FD87B1236",
+            "internals" : {
+               "DEF" : "BresserTemeo_1",
+               "NAME" : "BresserTemeo_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "78",
+               "state" : "T: 27.6 H: 78",
+               "temperature" : "27.6",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#6"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 1, ID 60",
+            "dmsg" : "W44#F02784F10FD87B0FFE",
+            "internals" : {
+               "DEF" : "BresserTemeo_1",
+               "NAME" : "BresserTemeo_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "78",
+               "state" : "T: 27.8 H: 78",
+               "temperature" : "27.8",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#7"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 1, ID 60",
+            "dmsg" : "W44#EF2784F310D87B0CF2",
+            "internals" : {
+               "DEF" : "BresserTemeo_1",
+               "NAME" : "BresserTemeo_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "77",
+               "state" : "T: 27.9 H: 77",
+               "temperature" : "27.9",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#8"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 1, ID 60",
+            "dmsg" : "W44#E42784EF1BD87B10D4",
+            "internals" : {
+               "DEF" : "BresserTemeo_1",
+               "NAME" : "BresserTemeo_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "72",
+               "state" : "T: 27.7 H: 72",
+               "temperature" : "27.7",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#9"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 2, ID 76",
+            "dmsg" : "W44#E24984ED1DB67B12D0",
+            "internals" : {
+               "DEF" : "BresserTemeo_2",
+               "NAME" : "BresserTemeo_2"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "2",
+               "humidity" : "71",
+               "state" : "T: 27.6 H: 71",
+               "temperature" : "27.6",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#10"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 2, ID 76",
+            "dmsg" : "W44#E04984EF1FB67B10D0",
+            "internals" : {
+               "DEF" : "BresserTemeo_2",
+               "NAME" : "BresserTemeo_2"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "2",
+               "humidity" : "70",
+               "state" : "T: 27.7 H: 70",
+               "temperature" : "27.7",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#11"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 2, ID 76",
+            "dmsg" : "W44#E04984F11FB67B0EBA",
+            "internals" : {
+               "DEF" : "BresserTemeo_2",
+               "NAME" : "BresserTemeo_2"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "2",
+               "humidity" : "70",
+               "state" : "T: 27.8 H: 70",
+               "temperature" : "27.8",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#12"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 3, ID 109",
+            "dmsg" : "W44#CE6DA4F131925B0F6E",
+            "internals" : {
+               "DEF" : "BresserTemeo_3",
+               "NAME" : "BresserTemeo_3"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "3",
+               "humidity" : "67",
+               "state" : "T: 27.8 H: 67",
+               "temperature" : "27.8",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#13"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 3, ID 109",
+            "dmsg" : "W44#CA6DA4F135925B0FAE",
+            "internals" : {
+               "DEF" : "BresserTemeo_3",
+               "NAME" : "BresserTemeo_3"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "3",
+               "humidity" : "65",
+               "state" : "T: 27.8 H: 65",
+               "temperature" : "27.8",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#14"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 3, ID 109",
+            "dmsg" : "W44#C96DA4EF36925B10E6",
+            "internals" : {
+               "DEF" : "BresserTemeo_3",
+               "NAME" : "BresserTemeo_3"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "3",
+               "humidity" : "64",
+               "state" : "T: 27.7 H: 64",
+               "temperature" : "27.7",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#15"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 1, ID 77",
+            "dmsg" : "W44#C829A4ED37D65B1288",
+            "internals" : {
+               "DEF" : "BresserTemeo_1",
+               "NAME" : "BresserTemeo_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "64",
+               "state" : "T: 27.6 H: 64",
+               "temperature" : "27.6",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#16"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 1, ID 77",
+            "dmsg" : "W44#C629A4EF39D65B108C",
+            "internals" : {
+               "DEF" : "BresserTemeo_1",
+               "NAME" : "BresserTemeo_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "63",
+               "state" : "T: 27.7 H: 63",
+               "temperature" : "27.7",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#17"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 1, ID 77",
+            "dmsg" : "W44#C629A4ED39D65B12AE",
+            "internals" : {
+               "DEF" : "BresserTemeo_1",
+               "NAME" : "BresserTemeo_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "63",
+               "state" : "T: 27.6 H: 63",
+               "temperature" : "27.6",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#18"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 2, ID 11",
+            "dmsg" : "W44#C64164EB39BE9B157E",
+            "internals" : {
+               "DEF" : "BresserTemeo_2",
+               "NAME" : "BresserTemeo_2"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "2",
+               "humidity" : "63",
+               "state" : "T: 27.5 H: 63",
+               "temperature" : "27.5",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#19"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 2, ID 11",
+            "dmsg" : "W44#C64164ED39BE9B1340",
+            "internals" : {
+               "DEF" : "BresserTemeo_2",
+               "NAME" : "BresserTemeo_2"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "2",
+               "humidity" : "63",
+               "state" : "T: 27.6 H: 63",
+               "temperature" : "27.6",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#20"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 2, ID 11",
+            "dmsg" : "W44#C44164ED3BBE9B1362",
+            "internals" : {
+               "DEF" : "BresserTemeo_2",
+               "NAME" : "BresserTemeo_2"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "2",
+               "humidity" : "62",
+               "state" : "T: 27.6 H: 62",
+               "temperature" : "27.6",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#21"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 3, ID 60",
+            "dmsg" : "W44#C46784ED3B987B12D8",
+            "internals" : {
+               "DEF" : "BresserTemeo_3",
+               "NAME" : "BresserTemeo_3"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "3",
+               "humidity" : "62",
+               "state" : "T: 27.6 H: 62",
+               "temperature" : "27.6",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#22"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 3, ID 60",
+            "dmsg" : "W44#C26784EB3D987B1514",
+            "internals" : {
+               "DEF" : "BresserTemeo_3",
+               "NAME" : "BresserTemeo_3"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "3",
+               "humidity" : "61",
+               "state" : "T: 27.5 H: 61",
+               "temperature" : "27.5",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#23"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 1, ID 122",
+            "dmsg" : "W44#C22F44EB3DD0BB1514",
+            "internals" : {
+               "DEF" : "BresserTemeo_1",
+               "NAME" : "BresserTemeo_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "61",
+               "state" : "T: 27.5 H: 61",
+               "temperature" : "27.5",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#24"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 1, ID 122",
+            "dmsg" : "W44#C02F44E53FD0BB1B80",
+            "internals" : {
+               "DEF" : "BresserTemeo_1",
+               "NAME" : "BresserTemeo_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "60",
+               "state" : "T: 27.2 H: 60",
+               "temperature" : "27.2",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#25"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 1, ID 118 - nach Batteriewechsel",
+            "dmsg" : "W44#C42EC4E73BD13B19B6",
+            "internals" : {
+               "DEF" : "BresserTemeo_1",
+               "NAME" : "BresserTemeo_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "62",
+               "state" : "T: 27.3 H: 62",
+               "temperature" : "27.3",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#26"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 1, ID 118 - nach Batteriewechsel",
+            "dmsg" : "W44#C42EC4EB3BD13B156E",
+            "internals" : {
+               "DEF" : "BresserTemeo_1",
+               "NAME" : "BresserTemeo_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "62",
+               "state" : "T: 27.5 H: 62",
+               "temperature" : "27.5",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#27"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 1, ID 118 - nach Batteriewechsel",
+            "dmsg" : "W44#C42EC4ED3BD13B1350",
+            "internals" : {
+               "DEF" : "BresserTemeo_1",
+               "NAME" : "BresserTemeo_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "62",
+               "state" : "T: 27.6 H: 62",
+               "temperature" : "27.6",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#28"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 1, ID 101 - Batterie schwach (LOW BAT)",
+            "dmsg" : "W44#B2ACA5274D535AD872",
+            "internals" : {
+               "DEF" : "BresserTemeo_1",
+               "NAME" : "BresserTemeo_1"
+            },
+            "readings" : {
+               "batteryState" : "low",
+               "channel" : "1",
+               "humidity" : "59",
+               "state" : "T: 29.3 H: 59",
+               "temperature" : "29.3",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#29"
+               }
+            ]
+         },
+         {
+            "comment" : "Channel 1, ID 101 - Batterie ok (NORM BAT)",
+            "dmsg" : "W44#AC2CA52B53D35AD50C",
+            "internals" : {
+               "DEF" : "BresserTemeo_1",
+               "NAME" : "BresserTemeo_1"
+            },
+            "readings" : {
+               "batteryState" : "ok",
+               "channel" : "1",
+               "humidity" : "56",
+               "state" : "T: 29.5 H: 56",
+               "temperature" : "29.5",
+               "type" : "BresserTemeo"
+            },
+            "tests" : [
+               {
+                  "comment" : "#30"
+               }
+            ]
          }
       ],
       "id" : "44",
