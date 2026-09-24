@@ -61,6 +61,8 @@
 # 19.09.2026 Dekodiertabelle wird einmal beim Laden des Moduls erzeugt und im Modul-Hash gehalten
 # 20.09.2026 Protokoll 27: fehlerhafter prematch korrigiert, Testdaten für EFS-3110A ergänzt
 # 20.09.2026 Match-Regex vorkompiliert (qr//), damit FHEM sie nicht je Nachricht neu übersetzt
+# 24.09.2026 Protokolle 37, 44/44x (Bresser Temeo) und 64 (WH2) in die Dekodiertabelle überführt, 
+#            Protokoll 37: prematch (Kanal 1-3, Feuchte) und sendmode ergänzt, Testdaten für 44/44x ergänzt
 
 package main;
 
@@ -342,7 +344,8 @@ sub SD_WS_DecodingSubs {
         #    Check with e.g. (byte1 + byte2 + byte3 + byte4 - byte5) % 256) = 0
         sensortype => 'Bresser 7009994',
         model      => 'SD_WS37_TH',
-        prematch   => sub { return 1; }, # no precheck known
+        prematch   => sub  { my ($rawData) = @_; return 1 if ($rawData =~ /^[0-9A-F]{2}[1235679ABDEF]{1}[0-9A-F]{3}[0-7][0-9A-F]{3,4}$/); }, # valid channel only 1-3, valid hum msb only 0-7
+        sendmode   => sub  { my (undef,$bitData) = @_; return substr($bitData,9,1) eq "1" ? "manual" : "auto"; },
         crcok      => sub  {
                         my (undef,$bitData,$name) = @_;
                         my $checksum = (SD_WS_binaryToNumber($bitData,0,7) + SD_WS_binaryToNumber($bitData,8,15) + SD_WS_binaryToNumber($bitData,16,23) + SD_WS_binaryToNumber($bitData,24,31)) & 0xFF;
@@ -372,7 +375,6 @@ sub SD_WS_DecodingSubs {
         id        => sub { my ($rawData,undef) = @_; return substr($rawData,0,2); },
         bat       => sub { my (undef,$bitData) = @_; return int(substr($bitData,8,1)) eq "0" ? "ok" : "low";    }, # Batterie-Bit konnte nicht geprueft werden
     },
-    #Log3 $name, 4, "$name: SD_WS37 decoded protocol = $protocol ($SensorTyp), sensor id = $id, channel = $channel";       
     38 =>
     {
         # Protokollbeschreibung: NC-3911, NC-3912 - Rosenstein & Soehne Digitales Kuehl- und Gefrierschrank-Thermometer
@@ -2911,7 +2913,7 @@ sub SD_WS_WH2SHIFT {
   "x_fhem_maintainer_github": [
     "Sidey79"
   ],
-  "version": "v1.1.8",
+  "version": "v1.1.9",
   "description": "The SD_WS module processes the messages from various environmental sensors received from an IO device (CUL, CUN, SIGNALDuino, SignalESP etc.)",
   "dynamic_config": 1,
   "keywords": [
