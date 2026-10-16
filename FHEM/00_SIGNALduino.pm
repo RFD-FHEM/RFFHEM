@@ -100,6 +100,8 @@ my %sets = (
   'cc1101_reg_user'     =>  ['noArg', \&FHEM::Devices::SIGNALduino::SD_CC1101::SetRegistersUser ],
   'cc1101_sens'         =>  ['4,8,12,16', \&FHEM::Devices::SIGNALduino::SD_CC1101::SetSens ],
   'LaCrossePairForSec'  =>  ['textFieldNL', \&SIGNALduino_Set_LaCrossePairForSec ],
+  'rfmodeTemp'          =>  ['textFieldNL', \&SIGNALduino_Set_rfmodeTemp ],
+  'rfmodeRestore'       =>  ['noArg', \&SIGNALduino_Set_rfmodeRestore ],
 );
 
 ## Supported config CC1101 ##
@@ -134,6 +136,7 @@ sub SIGNALduino_Initialize {
     push @rfmode, map { $Protocols->checkProperty($_, 'rfmode') } $Protocols->getKeys('rfmode');    
     @rfmode = sort @rfmode;
     Log3 'SIGNALduino', 4, qq[SIGNALduino_Initialize: rfmode list: @rfmode];
+    $sets{rfmodeTemp}[0] = join(',', grep { $_ ne 'SlowRF' } @rfmode);
   }
 
   $hash->{DefFn}          = \&SIGNALduino_Define;
@@ -346,7 +349,7 @@ sub SIGNALduino_Set_FhemWebList {
       (
         ( IsDummy($hash->{NAME}) && $_ =~ m/^(?:close|reset|LaCrossePairForSec)/ ) ||
         ($_ =~ m/^LaCrossePairForSec/ && ReadingsVal($hash->{NAME},'cc1101_config_ext','') =~ '2-FSK') ||       
-        ( (InternalVal($hash->{NAME},'cc1101_available',0 ) || (!InternalVal($hash->{NAME},'cc1101_available',0) && $_ !~ /^cc/ )) && $_ !~ m/^LaCrossePairForSec/) &&
+        ( (InternalVal($hash->{NAME},'cc1101_available',0 ) || (!InternalVal($hash->{NAME},'cc1101_available',0) && $_ !~ /^(?:cc|rfmode)/ )) && $_ !~ m/^LaCrossePairForSec/) &&
         ( !IsDummy($hash->{NAME}) && (defined(DevIo_IsOpen($hash)) || $_ =~ m/^(?:flash|reset)/)  )
       )
     )
@@ -385,6 +388,10 @@ sub SIGNALduino_Set_reset
 sub SIGNALduino_Attr_rfmode {
   my $hash = shift // carp 'must be called with hash of iodevice as first param';
   my $aVal = shift // return;
+  my $volatile = shift // 0;   # 1 = write only the CC1101 (firmware commands w and CV), the EEPROM keeps the configuration
+
+  my $cmdWrite = $volatile ? 'w' : 'W';
+  my $cmdConfig = $volatile ? 'CV' : 'C';
 
   if ( (InternalVal($hash->{NAME},"cc1101_available",0) == 0) && (!IsDummy($hash->{NAME})) ) {
     return 'ERROR: This rfmode is only available for a receiver with CC1101.';
@@ -398,7 +405,11 @@ sub SIGNALduino_Attr_rfmode {
   if ( ($hash->{DevState} eq 'initialized') && (InternalVal($hash->{NAME},"cc1101_available",0) == 1) ) {
     $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal on DevState $hash->{DevState} (please check activated protocols via 'Display protocollist')");
 
-    SIGNALduino_AddSendQueue($hash,'CDW'); # disable WMBus
+    if ($volatile && $aVal eq 'SlowRF') {
+      return 'ERROR: SlowRF can not be set temporarily, use rfmodeRestore';
+    }
+
+    SIGNALduino_AddSendQueue($hash,$cmdConfig.'DW'); # disable WMBus
     my $rfmode;
     if ($aVal ne 'SlowRF') {
       if ( scalar( @{$hash->{mnIdList}} ) >= 1 ) {
@@ -416,17 +427,17 @@ sub SIGNALduino_Attr_rfmode {
               SIGNALduino_AddSendQueue($hash,'WS3A');   # SFRX, Flush the RX FIFO buffer. Only issue SFRX in IDLE or RXFIFO_OVERFLOW states.
               for my $i (0...scalar(@{$register})-1) {
                 $hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_rfmode, write value " . @{$register}[$i]);
-                my $argcmd = sprintf("W%02X%s",hex(substr(@{$register}[$i],0,2)) + 2,substr(@{$register}[$i],2,2));
+                my $argcmd = sprintf("%s%02X%s",$cmdWrite,hex(substr(@{$register}[$i],0,2)) + 2,substr(@{$register}[$i],2,2));
                 main::SIGNALduino_AddSendQueue($hash,$argcmd);
               }
               main::SIGNALduino_WriteInit($hash); # set cc1101 SIDLE and then SRX
               if ($rfmode =~ /^WMBus_/) {
                 if ($rfmode eq 'WMBus_S') {
-                  SIGNALduino_AddSendQueue($hash,'CDT'); # WMBus_S
+                  SIGNALduino_AddSendQueue($hash,$cmdConfig.'DT'); # WMBus_S
                 } else {
-                  SIGNALduino_AddSendQueue($hash,'CET'); # enable WMBus_T
+                  SIGNALduino_AddSendQueue($hash,$cmdConfig.'ET'); # enable WMBus_T
                 }
-                SIGNALduino_AddSendQueue($hash,'CEW');   # enable WMBus
+                SIGNALduino_AddSendQueue($hash,$cmdConfig.'EW');   # enable WMBus
               }
               last MNIDLIST;  # found $rfmode, exit loop
             } else {
@@ -449,6 +460,37 @@ sub SIGNALduino_Attr_rfmode {
     }
   }
 
+  return;
+}
+
+############################# package main
+# switch the CC1101 to another rfmode without writing the EEPROM, attribute rfmode is not changed
+sub SIGNALduino_Set_rfmodeTemp {
+  my ($hash, @a) = @_;
+  my $aVal = $a[1] // return 'ERROR: missing rfmode';
+
+  if (!first { $_ eq $aVal } @rfmode) {
+    return 'ERROR: The rfmode is not supported';
+  }
+  my $ret = SIGNALduino_Attr_rfmode($hash,$aVal,1);
+  return $ret if (defined $ret);
+
+  $hash->{rfmodeTemp} = $aVal;
+  $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmodeTemp, switched temporarily to $aVal");
+  return;
+}
+
+############################# package main
+# reload the CC1101 configuration stored in the EEPROM of the uC (rfmode attribute)
+sub SIGNALduino_Set_rfmodeRestore {
+  my ($hash, @a) = @_;
+
+  if (InternalVal($hash->{NAME},'cc1101_available',0) == 0) {
+    return 'ERROR: This command is only available for a receiver with CC1101.';
+  }
+  SIGNALduino_AddSendQueue($hash,'WR');
+  delete $hash->{rfmodeTemp};
+  $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmodeRestore, configuration reloaded from EEPROM");
   return;
 }
 
@@ -3342,6 +3384,21 @@ USB-connected devices (SIGNALduino):<br>
     This will do a reset of the usb port and normaly causes to reset the uC connected.
   </li><br>
 
+  <a name="rfmodeRestore"></a>
+  <li>rfmodeRestore<br>
+    Discards a configuration set with <code>rfmodeTemp</code> and reloads the CC1101 registers and receive settings stored in the EEPROM of the uC (firmware command <code>WR</code>).
+    The uC uses the stored configuration after a restart anyway.
+  </li><br>
+
+  <a name="rfmodeTemp"></a>
+  <li>rfmodeTemp<br>
+    Switches the CC1101 temporarily to another rfmode, like attribute <a href="#rfmode">rfmode</a>, but without writing the EEPROM of the uC (firmware commands <code>w</code> and <code>CV</code>).
+    The attribute rfmode is not changed. This is intended for regularly switching for a short time, e.g. a few seconds to WMBus_T to receive a water meter, because writing the EEPROM on every switch
+    wears out the flash of an ESP8266 or ESP32. Use <a href="#rfmodeRestore">rfmodeRestore</a> to switch back. SlowRF is not supported.<br>
+    Requires a firmware with support of the commands <code>w</code>, <code>CV</code> and <code>WR</code>. Older firmware ignores these commands and keeps its configuration.
+    <ul>example: <code>set sduino rfmodeTemp WMBus_T</code></ul>
+  </li><br>
+
   <a name="sendMsg"></a>
   <li>sendMsg<br>
     This command will create the needed instructions for sending raw data via the signalduino. Insteaf of specifying the signaldata by your own you specify
@@ -3972,6 +4029,21 @@ USB-connected devices (SIGNALduino):<br>
   <a name="reset"></a>
   <li>reset<br>
     &Ouml;ffnet die Verbindung zum Ger&auml;t neu und initialisiert es.
+  </li><br>
+
+  <a name="rfmodeRestore"></a>
+  <li>rfmodeRestore<br>
+    Verwirft eine mit <code>rfmodeTemp</code> gesetzte Konfiguration und l&auml;dt die im EEPROM des uC gespeicherten CC1101-Register und Empfangseinstellungen neu (Firmwarebefehl <code>WR</code>).
+    Nach einem Neustart verwendet der uC die gespeicherte Konfiguration ohnehin.
+  </li><br>
+
+  <a name="rfmodeTemp"></a>
+  <li>rfmodeTemp<br>
+    Schaltet den CC1101 vor&uuml;bergehend auf einen anderen rfmode, wie das Attribut <a href="#rfmode">rfmode</a>, schreibt dabei aber nicht in das EEPROM des uC (Firmwarebefehle <code>w</code> und <code>CV</code>).
+    Das Attribut rfmode bleibt unver&auml;ndert. Gedacht ist dies f&uuml;r regelm&auml;&szlig;iges kurzes Umschalten, z. B. f&uuml;r einige Sekunden auf WMBus_T f&uuml;r einen Wasserz&auml;hler, da das Schreiben des EEPROM bei jedem Umschalten
+    den Flash eines ESP8266 oder ESP32 abnutzt. Zur&uuml;ck geht es mit <a href="#rfmodeRestore">rfmodeRestore</a>. SlowRF wird nicht unterst&uuml;tzt.<br>
+    Ben&ouml;tigt eine Firmware, die die Befehle <code>w</code>, <code>CV</code> und <code>WR</code> unterst&uuml;tzt. &Auml;ltere Firmware ignoriert diese Befehle und beh&auml;lt ihre Konfiguration.
+    <ul>Beispiel: <code>set sduino rfmodeTemp WMBus_T</code></ul>
   </li><br>
 
   <a name="sendMsg"></a>
