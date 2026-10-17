@@ -141,8 +141,24 @@ InternalTimer(time()+1, sub() {
     subtest 'set rfmodeTemp SlowRF' => sub {
       delete $hash->{QUEUE};
       my $ret = SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeTemp','SlowRF');
-      like($ret,qr/SlowRF can not be set temporarily/,q[verify error message]);
-      is($hash->{QUEUE},U(),q[verify sendqueue is empty]);
+      is($ret,U(),q[verify return undef]);
+      # default register values of the firmware (cc1101::initVal), EEPROM address = register + 2
+      is($hash->{QUEUE}, array {
+          item 'CVDW';
+          item 'WS36';
+          item 'WS3A';
+          item $_ for qw(w020D w032E w042D w0547 w06D3 w0791 w083D w0904);
+          item $_ for qw(w0A32 w0B00 w0C00 w0D06 w0E00 w0F10 w10B0 w1171);
+          item $_ for qw(w1257 w13C4 w1430 w1523 w16B9 w1700 w1807 w1900);
+          item $_ for qw(w1A18 w1B14 w1C6C w1D07 w1E00 w1F91 w2087 w216B);
+          item $_ for qw(w22F8 w23B6 w2411 w25E9 w262A w2700 w281F w2941);
+          item $_ for qw(w2A00);
+          item 'WS36';
+          item 'WS3A';
+          item 'WS34';
+          end();
+        }, 'verify sendqueue writes the default registers without factory reset');
+      is($hash->{rfmodeTemp},'SlowRF',q[verify internal rfmodeTemp]);
     };
 
     subtest 'set rfmodeTemp blafasel' => sub {

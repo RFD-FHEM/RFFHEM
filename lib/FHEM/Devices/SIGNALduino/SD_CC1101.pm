@@ -30,6 +30,7 @@ our @EXPORT_OK = qw(
   %patable
   @ampllist
   %cc1101_version
+  @cc1101_factory_register
 );
 # Not used outside
 
@@ -40,6 +41,22 @@ our %EXPORT_TAGS = (
 );
 # Predeclare used symbols from main package (to be imported or accessed via full path)
 # Assuming main::SIGNALduino_AddSendQueue and main::SIGNALduino_WriteInit exist and are exported or accessible.
+
+# default register values of the firmware (cc1101::initVal, rfmode SlowRF), register address and value as hex
+# used to switch temporarily to SlowRF without the EEPROM factory reset (command e)
+our @cc1101_factory_register = (
+  '000D', '012E', '022D', '0347', # IOCFG2 IOCFG1 IOCFG0 FIFOTHR
+  '04D3', '0591', '063D', '0704', # SYNC1 SYNC0 PKTLEN PKTCTRL1
+  '0832', '0900', '0A00', '0B06', # PKTCTRL0 ADDR CHANNR FSCTRL1
+  '0C00', '0D10', '0EB0', '0F71', # FSCTRL0 FREQ2 FREQ1 FREQ0
+  '1057', '11C4', '1230', '1323', # MDMCFG4 MDMCFG3 MDMCFG2 MDMCFG1
+  '14B9', '1500', '1607', '1700', # MDMCFG0 DEVIATN MCSM2 MCSM1
+  '1818', '1914', '1A6C', '1B07', # MCSM0 FOCCFG BSCFG AGCCTRL2
+  '1C00', '1D91', '1E87', '1F6B', # AGCCTRL1 AGCCTRL0 WOREVT1 WOREVT0
+  '20F8', '21B6', '2211', '23E9', # WORCTRL FREND1 FREND0 FSCAL3
+  '242A', '2500', '261F', '2741', # FSCAL2 FSCAL1 FSCAL0 RCCTRL1
+  '2800',                         # RCCTRL0
+);
 
 our %cc1101_status_register = ( # for get ccreg 30-3D status registers
   '30' => 'PARTNUM       ',

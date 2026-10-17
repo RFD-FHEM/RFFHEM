@@ -136,7 +136,7 @@ sub SIGNALduino_Initialize {
     push @rfmode, map { $Protocols->checkProperty($_, 'rfmode') } $Protocols->getKeys('rfmode');    
     @rfmode = sort @rfmode;
     Log3 'SIGNALduino', 4, qq[SIGNALduino_Initialize: rfmode list: @rfmode];
-    $sets{rfmodeTemp}[0] = join(',', grep { $_ ne 'SlowRF' } @rfmode);
+    $sets{rfmodeTemp}[0] = join(',', @rfmode);
   }
 
   $hash->{DefFn}          = \&SIGNALduino_Define;
@@ -405,10 +405,6 @@ sub SIGNALduino_Attr_rfmode {
   if ( ($hash->{DevState} eq 'initialized') && (InternalVal($hash->{NAME},"cc1101_available",0) == 1) ) {
     $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal on DevState $hash->{DevState} (please check activated protocols via 'Display protocollist')");
 
-    if ($volatile && $aVal eq 'SlowRF') {
-      return 'ERROR: SlowRF can not be set temporarily, use rfmodeRestore';
-    }
-
     SIGNALduino_AddSendQueue($hash,$cmdConfig.'DW'); # disable WMBus
     my $rfmode;
     if ($aVal ne 'SlowRF') {
@@ -423,14 +419,7 @@ sub SIGNALduino_Attr_rfmode {
 
             if ($register != -1) {
               $hash->{logMethod}->($hash->{NAME}, 5, qq[$hash->{NAME}: Set_rfmode, register settings exist on ID=$id ]);
-              SIGNALduino_AddSendQueue($hash,'WS36');   # SIDLE, Exit RX / TX, turn off frequency synthesizer
-              SIGNALduino_AddSendQueue($hash,'WS3A');   # SFRX, Flush the RX FIFO buffer. Only issue SFRX in IDLE or RXFIFO_OVERFLOW states.
-              for my $i (0...scalar(@{$register})-1) {
-                $hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_rfmode, write value " . @{$register}[$i]);
-                my $argcmd = sprintf("%s%02X%s",$cmdWrite,hex(substr(@{$register}[$i],0,2)) + 2,substr(@{$register}[$i],2,2));
-                main::SIGNALduino_AddSendQueue($hash,$argcmd);
-              }
-              main::SIGNALduino_WriteInit($hash); # set cc1101 SIDLE and then SRX
+              SIGNALduino_rfmode_WriteRegister($hash,$cmdWrite,$register);
               if ($rfmode =~ /^WMBus_/) {
                 if ($rfmode eq 'WMBus_S') {
                   SIGNALduino_AddSendQueue($hash,$cmdConfig.'DT'); # WMBus_S
@@ -454,12 +443,30 @@ sub SIGNALduino_Attr_rfmode {
         $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Set_rfmode, no MN protocols in 'Display protocollist' activated]);
         return 'ERROR: no MN protocols activated in \'Display protocollist\'';
       }
+    } elsif ($volatile) {
+      SIGNALduino_rfmode_WriteRegister($hash,$cmdWrite,\@FHEM::Devices::SIGNALduino::SD_CC1101::cc1101_factory_register);
+      $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set temporarily to $aVal (ASK/OOK mode default register settings)");
     } else {
       SIGNALduino_AddSendQueue($hash,'e');
       $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: Set_rfmode, set to $aVal (ASK/OOK mode load default register settings from uC)");
     }
   }
 
+  return;
+}
+
+############################# package main
+# write a register list (entries 'RRVV', register and value as hex) to the CC1101, $cmdWrite is W (EEPROM) or w (CC1101 only)
+sub SIGNALduino_rfmode_WriteRegister {
+  my ($hash, $cmdWrite, $register) = @_;
+
+  SIGNALduino_AddSendQueue($hash,'WS36');   # SIDLE, Exit RX / TX, turn off frequency synthesizer
+  SIGNALduino_AddSendQueue($hash,'WS3A');   # SFRX, Flush the RX FIFO buffer. Only issue SFRX in IDLE or RXFIFO_OVERFLOW states.
+  for my $reg (@{$register}) {
+    $hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_rfmode, write value $reg");
+    SIGNALduino_AddSendQueue($hash,sprintf("%s%02X%s",$cmdWrite,hex(substr($reg,0,2)) + 2,substr($reg,2,2)));
+  }
+  SIGNALduino_WriteInit($hash); # set cc1101 SIDLE and then SRX
   return;
 }
 
@@ -3394,7 +3401,7 @@ USB-connected devices (SIGNALduino):<br>
   <li>rfmodeTemp<br>
     Switches the CC1101 temporarily to another rfmode, like attribute <a href="#rfmode">rfmode</a>, but without writing the EEPROM of the uC (firmware commands <code>w</code> and <code>CV</code>).
     The attribute rfmode is not changed. This is intended for regularly switching for a short time, e.g. a few seconds to WMBus_T to receive a water meter, because writing the EEPROM on every switch
-    wears out the flash of an ESP8266 or ESP32. Use <a href="#rfmodeRestore">rfmodeRestore</a> to switch back. SlowRF is not supported.<br>
+    wears out the flash of an ESP8266 or ESP32. Use <a href="#rfmodeRestore">rfmodeRestore</a> to switch back. SlowRF writes the default register values of the firmware, the PA table (cc1101_patable) is not changed.<br>
     Requires a firmware with support of the commands <code>w</code>, <code>CV</code> and <code>WR</code>. Older firmware ignores these commands and keeps its configuration.
     <ul>example: <code>set sduino rfmodeTemp WMBus_T</code></ul>
   </li><br>
@@ -4041,7 +4048,7 @@ USB-connected devices (SIGNALduino):<br>
   <li>rfmodeTemp<br>
     Schaltet den CC1101 vor&uuml;bergehend auf einen anderen rfmode, wie das Attribut <a href="#rfmode">rfmode</a>, schreibt dabei aber nicht in das EEPROM des uC (Firmwarebefehle <code>w</code> und <code>CV</code>).
     Das Attribut rfmode bleibt unver&auml;ndert. Gedacht ist dies f&uuml;r regelm&auml;&szlig;iges kurzes Umschalten, z. B. f&uuml;r einige Sekunden auf WMBus_T f&uuml;r einen Wasserz&auml;hler, da das Schreiben des EEPROM bei jedem Umschalten
-    den Flash eines ESP8266 oder ESP32 abnutzt. Zur&uuml;ck geht es mit <a href="#rfmodeRestore">rfmodeRestore</a>. SlowRF wird nicht unterst&uuml;tzt.<br>
+    den Flash eines ESP8266 oder ESP32 abnutzt. Zur&uuml;ck geht es mit <a href="#rfmodeRestore">rfmodeRestore</a>. Bei SlowRF werden die Standardregister der Firmware geschrieben, die PA-Tabelle (cc1101_patable) bleibt unver&auml;ndert.<br>
     Ben&ouml;tigt eine Firmware, die die Befehle <code>w</code>, <code>CV</code> und <code>WR</code> unterst&uuml;tzt. &Auml;ltere Firmware ignoriert diese Befehle und beh&auml;lt ihre Konfiguration.
     <ul>Beispiel: <code>set sduino rfmodeTemp WMBus_T</code></ul>
   </li><br>
