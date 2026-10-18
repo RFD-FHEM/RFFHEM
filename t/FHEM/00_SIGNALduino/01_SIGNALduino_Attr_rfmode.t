@@ -161,6 +161,17 @@ InternalTimer(time()+1, sub() {
       is($hash->{rfmodeTemp},'SlowRF',q[verify internal rfmodeTemp]);
     };
 
+    subtest 'set rfmodeTemp on not initialized receiver' => sub {
+      delete $hash->{QUEUE};
+      delete $hash->{rfmodeTemp};
+      $hash->{DevState} = 'waitInit';
+      my $ret = SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeTemp','WMBus_T');
+      $hash->{DevState} = 'initialized';
+      like($ret,qr/is not active/,q[verify error message from SIGNALduino_Set]);
+      is($hash->{QUEUE},U(),q[verify sendqueue is empty]);
+      is($hash->{rfmodeTemp},U(),q[verify internal rfmodeTemp is not set]);
+    };
+
     subtest 'set rfmodeTemp blafasel' => sub {
       my $ret = SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeTemp','blafasel');
       is($ret,q[ERROR: The rfmode is not supported],q[verify error message]);

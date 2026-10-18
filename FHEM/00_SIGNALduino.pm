@@ -403,7 +403,7 @@ sub SIGNALduino_Attr_rfmode {
   
   ## DevState waitInit is on first start after FHEM restart | initialized is after cc1101 available
   if ( ($hash->{DevState} eq 'initialized') && (InternalVal($hash->{NAME},"cc1101_available",0) == 1) ) {
-    $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal on DevState $hash->{DevState} (please check activated protocols via 'Display protocollist')");
+    $hash->{logMethod}->($hash->{NAME}, $volatile ? 4 : 3, "$hash->{NAME}: Set_rfmode, set to $aVal on DevState $hash->{DevState} (please check activated protocols via 'Display protocollist')");
 
     SIGNALduino_AddSendQueue($hash,$cmdConfig.'DW'); # disable WMBus
     my $rfmode;
@@ -482,7 +482,7 @@ sub SIGNALduino_Set_rfmodeTemp {
   return $ret if (defined $ret);
 
   $hash->{rfmodeTemp} = $aVal;
-  $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmodeTemp, switched temporarily to $aVal");
+  $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_rfmodeTemp, switched temporarily to $aVal");
   return;
 }
 
@@ -496,7 +496,7 @@ sub SIGNALduino_Set_rfmodeRestore {
   }
   SIGNALduino_AddSendQueue($hash,'WR');
   delete $hash->{rfmodeTemp};
-  $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmodeRestore, configuration reloaded from EEPROM");
+  $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_rfmodeRestore, configuration reloaded from EEPROM");
   return;
 }
 
