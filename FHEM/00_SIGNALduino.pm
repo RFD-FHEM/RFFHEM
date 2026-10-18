@@ -158,6 +158,7 @@ sub SIGNALduino_Initialize {
             .' WS09_CRCAUS:0,1,2'
             .' addvaltrigger'
             .' blacklist_IDs'
+            .' cc1101_freqOffset'
             .' cc1101_frequency'
             .' cc1101_reg_user'
             ." debug:0$dev"
@@ -455,10 +456,31 @@ sub SIGNALduino_Attr_rfmode {
 }
 
 ############################# package main
+# add attribute cc1101_freqOffset (kHz) to the frequency registers 0D..0F (FREQ2..FREQ0) of a register list,
+# it corrects the crystal deviation of a receiver once for all rfmodes
+sub SIGNALduino_rfmode_FreqOffset {
+  my ($hash, $register) = @_;
+
+  my $offset = AttrVal($hash->{NAME},'cc1101_freqOffset',0);
+  return $register if ($offset == 0);
+
+  my %reg = map { uc(substr($_,0,2)) => hex(substr($_,2,2)) } @{$register};
+  return $register if (grep { !exists $reg{$_} } qw(0D 0E 0F));
+
+  my $steps = $offset * 65536 / 26000;   # 26 MHz / 2^16 = 0.397 kHz per step
+  my $freq = ($reg{'0D'} << 16 | $reg{'0E'} << 8 | $reg{'0F'}) + int($steps + ($steps < 0 ? -0.5 : 0.5));
+  my %new = ('0D' => $freq >> 16 & 0xFF, '0E' => $freq >> 8 & 0xFF, '0F' => $freq & 0xFF);
+  $hash->{logMethod}->($hash->{NAME}, 4, sprintf("%s: rfmode_FreqOffset, %+g kHz, frequency %.3f MHz",$hash->{NAME},$offset,$freq * 26 / 65536));
+
+  return [ map { my $r = uc(substr($_,0,2)); exists $new{$r} ? sprintf('%s%02X',$r,$new{$r}) : $_ } @{$register} ];
+}
+
+############################# package main
 # write a register list (entries 'RRVV', register and value as hex) to the CC1101, $cmdWrite is W (EEPROM) or w (CC1101 only)
 sub SIGNALduino_rfmode_WriteRegister {
   my ($hash, $cmdWrite, $register) = @_;
 
+  $register = SIGNALduino_rfmode_FreqOffset($hash,$register);
   SIGNALduino_AddSendQueue($hash,'WS36');   # SIDLE, Exit RX / TX, turn off frequency synthesizer
   SIGNALduino_AddSendQueue($hash,'WS3A');   # SFRX, Flush the RX FIFO buffer. Only issue SFRX in IDLE or RXFIFO_OVERFLOW states.
   for my $reg (@{$register}) {
@@ -2493,6 +2515,13 @@ sub SIGNALduino_Attr {
     return "Note, please use other userReadings names.\nReserved names from $name are: cc1101_config, cc1101_config_ext, cc1101_patable"
       if ($aVal =~ /cc1101_(?:config(?:_ext)?|patable)(?:\s|{)/);
   }
+  ## Change cc1101_freqOffset
+  elsif ($aName eq 'cc1101_freqOffset' && $cmd eq 'set') # frequency offset in kHz for every rfmode
+  {
+    return 'ERROR: This attribute is only available for a receiver with CC1101.' if ( ($init_done == 1) && (InternalVal($hash->{NAME},"cc1101_available",0) == 0) );
+    return 'ERROR: Please use a dot as decimal separator, e.g. 77.5' if ($aVal =~ /,/);
+    return 'ERROR: The frequency offset must be a number in kHz between -500 and 500' if ($aVal !~ /^[+-]?\d+(?:\.\d+)?$/ || abs($aVal) > 500);
+  }
   ## Change cc1101_reg_user
   elsif ($aName eq 'cc1101_reg_user' && $cmd eq 'set') # set default register
   {
@@ -3522,6 +3551,14 @@ USB-connected devices (SIGNALduino):<br>
   <li>blacklist_IDs<br>
     The blacklist works only if a whitelist not exist.
   </li><br>
+  <a name="cc1101_freqOffset"></a>
+  <li>cc1101_freqOffset<br>
+    Frequency offset in kHz (-500 to 500, decimal separator is a dot), added to the frequency of every <a href="#rfmode">rfmode</a> and of <a href="#rfmodeTemp">rfmodeTemp</a>.
+    It corrects the crystal deviation of the receiver once for all modes, because the deviation is nearly the same over the 868 MHz band. The attribute takes effect the next time rfmode or rfmodeTemp is set.
+    SlowRF set by the attribute rfmode (factory reset <code>e</code>) is not corrected.<br>
+    Hint: the value <code>A=</code> of a received FSK message (internal <code>&lt;IODev&gt;_FREQAFC</code> of the sensor) shows the remaining offset in steps of 1.59 kHz.
+    <ul>example: <code>attr sduino cc1101_freqOffset 77</code></ul>
+  </li><br>
   <a name="cc1101_frequency"></a>
   <li>cc1101_frequency<br>
     Specify the frequency of your SIGNALduino. Default is 433 Mhz.<br>
@@ -4166,6 +4203,14 @@ USB-connected devices (SIGNALduino):<br>
   <a name="blacklist_IDs"></a>
   <li>blacklist_IDs<br>
     Dies ist eine durch Komma getrennte Liste. Die Blacklist funktioniert nur, wenn keine Whitelist existiert! Hier kann man ID´s eintragen welche man nicht ausgewertet haben m&ouml;chte.
+  </li><br>
+  <a name="cc1101_freqOffset"></a>
+  <li>cc1101_freqOffset<br>
+    Frequenzversatz in kHz (-500 bis 500, Dezimaltrenner ist der Punkt), der zur Frequenz jedes <a href="#rfmode">rfmode</a> und von <a href="#rfmodeTemp">rfmodeTemp</a> addiert wird.
+    Damit wird die Abweichung des Quarzes des Empf&auml;ngers einmal f&uuml;r alle Modi korrigiert, da sie &uuml;ber das 868-MHz-Band nahezu gleich ist. Das Attribut wirkt beim n&auml;chsten Setzen von rfmode oder rfmodeTemp.
+    SlowRF &uuml;ber das Attribut rfmode (Werksreset <code>e</code>) wird nicht korrigiert.<br>
+    Hinweis: Der Wert <code>A=</code> einer empfangenen FSK-Nachricht (Internal <code>&lt;IODev&gt;_FREQAFC</code> des Sensors) zeigt den verbleibenden Versatz in Schritten von 1,59 kHz.
+    <ul>Beispiel: <code>attr sduino cc1101_freqOffset 77</code></ul>
   </li><br>
   <a name="cc1101_frequency"></a>
   <li>cc1101_frequency<br>

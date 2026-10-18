@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 use Test2::V0;
-use Test2::Tools::Compare qw{is item U D like hash array bag match end};
+use Test2::Tools::Compare qw{is item U D like hash array bag match end exact_ref};
 use Mock::Sub;
 use Test2::Todo;
 
@@ -171,6 +171,28 @@ InternalTimer(time()+1, sub() {
       like($ret,qr/is not active/,q[verify error message from SIGNALduino_Set]);
       is($hash->{QUEUE},U(),q[verify sendqueue is empty]);
       is($hash->{rfmodeTemp},U(),q[verify internal rfmodeTemp is not set]);
+    };
+
+    subtest 'attribute cc1101_freqOffset' => sub {
+      my $freq = sub { [ grep { /^[Ww](?:0F|10|11)[0-9A-F]{2}$/ } @{$hash->{QUEUE} // []} ] };
+
+      CommandAttr(undef, qq[cc1101dummyDuino cc1101_freqOffset 80]);
+      delete $hash->{QUEUE};
+      is(SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeTemp','WMBus_T'),U(),q[rfmodeTemp WMBus_T with offset]);
+      is($freq->(),['w0F21','w106C','w119A'],q[868.950 MHz + 80 kHz = 869.030 MHz written volatile]);
+
+      CommandAttr(undef, qq[cc1101dummyDuino cc1101_freqOffset -40]);
+      delete $hash->{QUEUE};
+      is(SIGNALduino_Attr_rfmode($hash,'WMBus_T'),U(),q[attr rfmode WMBus_T with negative offset]);
+      is($freq->(),['W0F21','W106B','W116B'],q[868.950 MHz - 40 kHz written to EEPROM]);
+
+      is(SIGNALduino_rfmode_FreqOffset($hash,['1230','1500']),['1230','1500'],q[register list without frequency is not changed]);
+      is(SIGNALduino_rfmode_FreqOffset($hash,['0d21','0e65','0fe8','1202']),['0D21','0E65','0F83','1202'],q[lower case list 868.350 MHz - 40 kHz = 868.310 MHz]);
+
+      CommandDeleteAttr(undef, qq[cc1101dummyDuino cc1101_freqOffset]);
+      my $list = ['0D21','0E65','0FE8'];
+      is(SIGNALduino_rfmode_FreqOffset($hash,$list),exact_ref($list),q[without attribute the list is returned unchanged]);
+      delete $hash->{QUEUE};
     };
 
     subtest 'set rfmodeTemp blafasel' => sub {
