@@ -445,7 +445,6 @@ sub SIGNALduino_Attr_rfmode {
       }
     } elsif ($volatile) {
       SIGNALduino_rfmode_WriteRegister($hash,$cmdWrite,\@FHEM::Devices::SIGNALduino::SD_CC1101::cc1101_factory_register);
-      $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set temporarily to $aVal (ASK/OOK mode default register settings)");
     } else {
       SIGNALduino_AddSendQueue($hash,'e');
       $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: Set_rfmode, set to $aVal (ASK/OOK mode load default register settings from uC)");
@@ -490,7 +489,7 @@ sub SIGNALduino_Set_rfmodeTemp {
 ############################# package main
 # reload the CC1101 configuration stored in the EEPROM of the uC (rfmode attribute)
 sub SIGNALduino_Set_rfmodeRestore {
-  my ($hash, @a) = @_;
+  my $hash = shift;
 
   if (InternalVal($hash->{NAME},'cc1101_available',0) == 0) {
     return 'ERROR: This command is only available for a receiver with CC1101.';
