@@ -14,9 +14,15 @@ InternalTimer(time()+1, sub {
 
 
 	subtest 'Test SIGNALduino_CheckCmdsResponse ' => sub {
-		plan(1);
+		plan(4);
 		my ($ret,undef)=SIGNALduino_CheckCmdsResponse($targetHash,"$target cmds => .*Use one of V R t X S P C r W s x e");
 		is($ret," V R t X S P C r W s x e","check return value");
+		is($targetHash->{cc1101_volatile},0,"firmware without w: cc1101_volatile = 0");
+
+		($ret,undef)=SIGNALduino_CheckCmdsResponse($targetHash,"$target cmds => .*Use one of V R t X S P C r W s w x e ");
+		is($ret," V R t X S P C r W s w x e ","check return value with w");
+		is($targetHash->{cc1101_volatile},1,"firmware with w: cc1101_volatile = 1");
+		delete $targetHash->{cc1101_volatile};
 	}; 
 
 	subtest 'Test with unset version' => sub {
@@ -65,13 +71,14 @@ InternalTimer(time()+1, sub {
 	}; 
 	
 	subtest 'Test with good version without cc1101' => sub {
-		plan(5);
+		plan(6);
 
 		my $mock = Test2::Mock->new(
 			track => 1,
 			class => 'main',
 			override => [
 				SIGNALduino_SimpleWrite => sub { 0 },
+				SIGNALduino_Get => sub { 0 },
 			],
 		);
 		my $tracking = $mock->sub_tracking;
@@ -85,17 +92,20 @@ InternalTimer(time()+1, sub {
 		is($targetHash->{ucCmd}->{cmd},"version","ucCmd not removed");
 		is($targetHash->{DevState},"initialized","check DevState");
 		is($targetHash->{cc1101_available},undef,"check internal cc1101_available");
+		is(scalar @{$tracking->{SIGNALduino_Get} // []},0,"get cmds not called without cc1101");
 		$mock->restore('SIGNALduino_SimpleWrite');
+		$mock->restore('SIGNALduino_Get');
 	}; 
 
 	subtest 'Test with good version' => sub {
-		plan(5);
+		plan(6);
 
 		my $mock = Test2::Mock->new(
 			track => 1,
 			class => 'main',
 			override => [
 				SIGNALduino_SimpleWrite => sub { 0 },
+				SIGNALduino_Get => sub { 0 },
 			],
 		);
 		my $tracking = $mock->sub_tracking;
@@ -111,7 +121,9 @@ InternalTimer(time()+1, sub {
 		is($targetHash->{DevState},"initialized","check DevState");
 		is($targetHash->{cc1101_available},1,"check internal cc1101_available");
 
+		is([map { $_->{args}[2] } @{$tracking->{SIGNALduino_Get} // []}],['cmds'],"get cmds called to detect cc1101_volatile");
 		$mock->restore('SIGNALduino_SimpleWrite');
+		$mock->restore('SIGNALduino_Get');
 	}; 
 
 

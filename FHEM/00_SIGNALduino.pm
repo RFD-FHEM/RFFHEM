@@ -349,7 +349,7 @@ sub SIGNALduino_Set_FhemWebList {
       (
         ( IsDummy($hash->{NAME}) && $_ =~ m/^(?:close|reset|LaCrossePairForSec)/ ) ||
         ($_ =~ m/^LaCrossePairForSec/ && ReadingsVal($hash->{NAME},'cc1101_config_ext','') =~ '2-FSK') ||       
-        ( (InternalVal($hash->{NAME},'cc1101_available',0 ) || (!InternalVal($hash->{NAME},'cc1101_available',0) && $_ !~ /^(?:cc|rfmode)/ )) && $_ !~ m/^LaCrossePairForSec/) &&
+        ( (InternalVal($hash->{NAME},'cc1101_available',0 ) || $_ !~ /^cc/ ) && (InternalVal($hash->{NAME},'cc1101_volatile',0) || $_ !~ /^rfmode/ ) && $_ !~ m/^LaCrossePairForSec/) &&
         ( !IsDummy($hash->{NAME}) && (defined(DevIo_IsOpen($hash)) || $_ =~ m/^(?:flash|reset)/)  )
       )
     )
@@ -478,6 +478,9 @@ sub SIGNALduino_Set_rfmodeTemp {
   if (!first { $_ eq $aVal } @rfmode) {
     return 'ERROR: The rfmode is not supported';
   }
+  if (InternalVal($hash->{NAME},'cc1101_available',0) && !InternalVal($hash->{NAME},'cc1101_volatile',0)) {
+    return 'ERROR: The firmware does not support a temporary rfmode (commands w, CV and WR), please update the firmware';
+  }
   my $ret = SIGNALduino_Attr_rfmode($hash,$aVal,1);
   return $ret if (defined $ret);
 
@@ -493,6 +496,9 @@ sub SIGNALduino_Set_rfmodeRestore {
 
   if (InternalVal($hash->{NAME},'cc1101_available',0) == 0) {
     return 'ERROR: This command is only available for a receiver with CC1101.';
+  }
+  if (!InternalVal($hash->{NAME},'cc1101_volatile',0)) {
+    return 'ERROR: The firmware does not support a temporary rfmode (commands w, CV and WR), please update the firmware';
   }
   SIGNALduino_AddSendQueue($hash,'WR');
   delete $hash->{rfmodeTemp};
@@ -847,6 +853,7 @@ sub SIGNALduino_CheckCmdsResponse {
 
   $msg =~ s/$name cmds =>//g;
   $msg =~ s/.*Use one of//g;
+  $hash->{cc1101_volatile} = ($msg =~ m/\sw\s/) ? 1 : 0;   # firmware supports w, CV and WR (rfmodeTemp, rfmodeRestore)
 
   return ($msg,0);
 }
@@ -1012,6 +1019,7 @@ sub SIGNALduino_CheckCmdResp {
       $hash->{keepalive}{retry} = 0;
       FHEM::Core::Timer::Helper::addTimer($name,gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, \&SIGNALduino_KeepAlive, $hash, 0);
       $hash->{cc1101_available} = 1  if ($ver =~ m/cc1101/);
+      SIGNALduino_Get($hash,$name,'cmds') if ($hash->{cc1101_available});   # sets cc1101_volatile
     }
   }
   else {
@@ -3401,7 +3409,7 @@ USB-connected devices (SIGNALduino):<br>
     Switches the CC1101 temporarily to another rfmode, like attribute <a href="#rfmode">rfmode</a>, but without writing the EEPROM of the uC (firmware commands <code>w</code> and <code>CV</code>).
     The attribute rfmode is not changed. This is intended for regularly switching for a short time, e.g. a few seconds to WMBus_T to receive a water meter, because writing the EEPROM on every switch
     wears out the flash of an ESP8266 or ESP32. Use <a href="#rfmodeRestore">rfmodeRestore</a> to switch back. SlowRF writes the default register values of the firmware, the PA table (cc1101_patable) is not changed.<br>
-    Requires a firmware with support of the commands <code>w</code>, <code>CV</code> and <code>WR</code>. Older firmware ignores these commands and keeps its configuration.
+    Requires a firmware with support of the commands <code>w</code>, <code>CV</code> and <code>WR</code>. After connecting, the module checks this with <code>get cmds</code> and sets the internal <code>cc1101_volatile</code>; without support, rfmodeTemp and rfmodeRestore are not offered and are refused.
     <ul>example: <code>set sduino rfmodeTemp WMBus_T</code></ul>
   </li><br>
 
@@ -4048,7 +4056,7 @@ USB-connected devices (SIGNALduino):<br>
     Schaltet den CC1101 vor&uuml;bergehend auf einen anderen rfmode, wie das Attribut <a href="#rfmode">rfmode</a>, schreibt dabei aber nicht in das EEPROM des uC (Firmwarebefehle <code>w</code> und <code>CV</code>).
     Das Attribut rfmode bleibt unver&auml;ndert. Gedacht ist dies f&uuml;r regelm&auml;&szlig;iges kurzes Umschalten, z. B. f&uuml;r einige Sekunden auf WMBus_T f&uuml;r einen Wasserz&auml;hler, da das Schreiben des EEPROM bei jedem Umschalten
     den Flash eines ESP8266 oder ESP32 abnutzt. Zur&uuml;ck geht es mit <a href="#rfmodeRestore">rfmodeRestore</a>. Bei SlowRF werden die Standardregister der Firmware geschrieben, die PA-Tabelle (cc1101_patable) bleibt unver&auml;ndert.<br>
-    Ben&ouml;tigt eine Firmware, die die Befehle <code>w</code>, <code>CV</code> und <code>WR</code> unterst&uuml;tzt. &Auml;ltere Firmware ignoriert diese Befehle und beh&auml;lt ihre Konfiguration.
+    Ben&ouml;tigt eine Firmware, die die Befehle <code>w</code>, <code>CV</code> und <code>WR</code> unterst&uuml;tzt. Das Modul pr&uuml;ft dies nach dem Verbinden mit <code>get cmds</code> und setzt das Internal <code>cc1101_volatile</code>; ohne Unterst&uuml;tzung werden rfmodeTemp und rfmodeRestore nicht angeboten und abgelehnt.
     <ul>Beispiel: <code>set sduino rfmodeTemp WMBus_T</code></ul>
   </li><br>
 

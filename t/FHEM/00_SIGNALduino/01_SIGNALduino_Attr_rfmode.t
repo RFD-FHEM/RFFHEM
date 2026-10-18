@@ -98,6 +98,7 @@ InternalTimer(time()+1, sub() {
     my $hash = $defs{cc1101dummyDuino};
     CommandDeleteAttr(undef, qq[cc1101dummyDuino whitelist_IDs]);
     CommandAttr(undef, qq[cc1101dummyDuino hardware esp32cc1101]);
+    $hash->{cc1101_volatile} = 1;   # firmware supports w, CV and WR
 
     subtest 'Attr_rfmode persistent writes EEPROM commands' => sub {
       delete $hash->{QUEUE};
@@ -188,6 +189,19 @@ InternalTimer(time()+1, sub() {
       is($ret,U(),q[verify return undef]);
       is($hash->{QUEUE}, array { item 'WR'; end(); }, 'verify sendqueue has WR command');
       is($hash->{rfmodeTemp},U(),q[verify internal rfmodeTemp is removed]);
+    };
+
+    subtest 'firmware without w, CV and WR' => sub {
+      delete $hash->{QUEUE};
+      delete $hash->{rfmodeTemp};
+      $hash->{cc1101_volatile} = 0;
+      my $ret = SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeTemp','WMBus_T');
+      like($ret,qr/firmware does not support a temporary rfmode/,q[verify error message rfmodeTemp]);
+      $ret = SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeRestore');
+      like($ret,qr/firmware does not support a temporary rfmode/,q[verify error message rfmodeRestore]);
+      is($hash->{QUEUE},U(),q[verify sendqueue is empty]);
+      is($hash->{rfmodeTemp},U(),q[verify internal rfmodeTemp is not set]);
+      $hash->{cc1101_volatile} = 1;
     };
 
     subtest 'set rfmodeRestore without cc1101' => sub {
