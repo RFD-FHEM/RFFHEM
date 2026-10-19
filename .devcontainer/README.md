@@ -27,12 +27,63 @@ Data is not stored persistent to ensure clean container restarts.
 
 ## Configuration Files
 
-The setup includes tasks (`tasks.json`) to help you running tests:
+`compose.local.yml` contains the repo-specific parts of the previous
+devcontainer compose setup.
+
+`compose.override.yml` carries the repo-specific FHEM start configuration.
+
+The setup includes tasks (`tasks.json`) to help you running tests and working
+with the optional SVN addon:
 
 - **Testing:**
   - `run prove FHEM module tests`
   - `run proove all FHEM tests`
   - `run prove Perl module files`
+- **SVN:**
+  - `run SVN checkout`
+  - `sync module to SVN`
+
+The post-start hook now runs `.devcontainer/scripts/bootstrap-worktree.sh`,
+which keeps the existing symlink-based runtime setup intact while matching the
+toolkit-style entry point.
+
+To bring up the optional SVN add-on outside VS Code, layer
+`.devcontainer/compose.addon-svn.yml` on top of the composed base/local files:
+
+```bash
+docker compose -f .devcontainer/compose.yml -f .devcontainer/compose.override.yml -f .devcontainer/compose.local.yml -f .devcontainer/compose.addon-svn.yml up -d
+```
+
+The main compose stack is:
+
+```bash
+docker compose -f .devcontainer/compose.yml -f .devcontainer/compose.override.yml -f .devcontainer/compose.local.yml up -d
+```
+
+In VS Code, `forwardPorts` exposes container ports `8083` and `7072` without
+binding fixed host ports, so the devcontainer does not collide with a live FHEM
+instance or other containers.
+
+The devcontainer image creates a non-root development user by default:
+
+- user: `dev`
+- uid: `1000`
+- gid: `1000`
+
+You can override those values at build time with:
+
+- `DEVCONTAINER_USER`
+- `DEVCONTAINER_UID`
+- `DEVCONTAINER_GID`
+
+VS Code connects as that user by default, while the image bootstrap still
+starts FHEM with the root-required init flow from the base image.
+
+If you start Compose manually and want to inspect the assigned host port, use:
+
+```bash
+docker compose -f .devcontainer/compose.yml -f .devcontainer/compose.override.yml -f .devcontainer/compose.local.yml port fhem-dev 8083
+```
 
 ## Getting Started
 
@@ -49,4 +100,3 @@ VSCode will build and start the DevContainer environment.
 ### Step 2: Developing
 
 Once the DevContainer is up and running, you can edit all project files directly in VSCode and run tests withhin Perl or FHEM.
-
