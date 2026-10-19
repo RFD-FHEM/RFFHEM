@@ -3,6 +3,8 @@ use strict;
 use warnings;
 use Test2::V0;
 use Test2::Tools::Compare qw{ is };
+use Cwd qw(getcwd abs_path);
+use File::Temp qw(tempdir);
 
 our %defs;
 
@@ -36,6 +38,24 @@ InternalTimer(time(), sub {
      ,q[Test rfmodes and order]);
      
      FhemTestUtils_resetLogs();
+},'dummyDuino');
+
+
+InternalTimer(time()+0.05, sub {
+    # Protocol hash must be found via modpath, not relative to the working directory
+    my %validationHash;
+    my $cwd = getcwd();
+    my $modpath = $attr{global}{modpath};
+    $attr{global}{modpath} = abs_path($modpath);
+    my $tmpdir = tempdir( CLEANUP => 1 );
+    chdir $tmpdir;
+    SIGNALduino_Initialize(\%validationHash);
+    chdir $cwd;
+    $attr{global}{modpath} = $modpath;
+
+    is(FhemTestUtils_gotLog("Error loading Protocol Hash"), 0, q[Protocol hash loaded with working directory outside modpath]);
+    ok(defined $validationHash{protocolObject}, q[protocolObject is set]);
+    FhemTestUtils_resetLogs();
 },'dummyDuino');
 
 
