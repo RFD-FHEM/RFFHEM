@@ -123,7 +123,7 @@ sub SIGNALduino_Initialize {
   my $dev = '';
   $dev = ',1' if (index(SDUINO_VERSION, 'dev') >= 0);
 
-  my $error = $Protocols->LoadHash(qq[./lib/FHEM/Devices/SIGNALduino/SD_Protocols/Data.pm]); 
+  my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/lib/FHEM/Devices/SIGNALduino/SD_Protocols/Data.pm]);
   
 
   if (defined($error)) {
