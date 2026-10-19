@@ -508,6 +508,8 @@ sub SIGNALduino_Set_rfmodeTemp {
 
   $hash->{rfmodeTemp} = $aVal;
   $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_rfmodeTemp, switched temporarily to $aVal");
+  SIGNALduino_Get($hash,$hash->{NAME},'ccconf');
+  SIGNALduino_Get($hash,$hash->{NAME},'config');
   return;
 }
 
@@ -525,6 +527,8 @@ sub SIGNALduino_Set_rfmodeRestore {
   SIGNALduino_AddSendQueue($hash,'WR');
   delete $hash->{rfmodeTemp};
   $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_rfmodeRestore, configuration reloaded from EEPROM");
+  SIGNALduino_Get($hash,$hash->{NAME},'ccconf');
+  SIGNALduino_Get($hash,$hash->{NAME},'config');
   return;
 }
 
@@ -1041,7 +1045,6 @@ sub SIGNALduino_CheckCmdResp {
       $hash->{keepalive}{retry} = 0;
       FHEM::Core::Timer::Helper::addTimer($name,gettimeofday() + SDUINO_KEEPALIVE_TIMEOUT, \&SIGNALduino_KeepAlive, $hash, 0);
       $hash->{cc1101_available} = 1  if ($ver =~ m/cc1101/);
-      SIGNALduino_Get($hash,$name,'cmds') if ($hash->{cc1101_available});   # sets cc1101_volatile
     }
   }
   else {

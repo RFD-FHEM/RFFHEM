@@ -244,6 +244,7 @@ sub SIGNALduino_CheckVersionResp {
       $hash->{logMethod}->($name, 5, "$name: CheckVersionResp, cc1101 available");
       main::SIGNALduino_Get($hash, $name,'ccconf');
       main::SIGNALduino_Get($hash, $name,'ccpatable');
+      main::SIGNALduino_Get($hash, $name,'cmds');   # sets cc1101_volatile
     } else {
       # connect device without cc1101 to port where a device with cc1101 was previously connected (example DEF with /dev/ttyUSB0@57600) #
       $hash->{logMethod}->($hash, 5, "$name: CheckVersionResp, delete old READINGS from cc1101 device");

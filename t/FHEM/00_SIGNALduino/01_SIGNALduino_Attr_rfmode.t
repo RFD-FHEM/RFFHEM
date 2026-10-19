@@ -99,6 +99,8 @@ InternalTimer(time()+1, sub() {
     CommandDeleteAttr(undef, qq[cc1101dummyDuino whitelist_IDs]);
     CommandAttr(undef, qq[cc1101dummyDuino hardware esp32cc1101]);
     $hash->{cc1101_volatile} = 1;   # firmware supports w, CV and WR
+    my @gets;
+    my $mockGet = Mock::Sub->new->mock(q[main::SIGNALduino_Get], side_effect => sub { push @gets, $_[2]; return });
 
     subtest 'Attr_rfmode persistent writes EEPROM commands' => sub {
       delete $hash->{QUEUE};
@@ -119,6 +121,7 @@ InternalTimer(time()+1, sub() {
     };
 
     subtest 'set rfmodeTemp WMBus_T' => sub {
+      @gets = ();
       delete $hash->{QUEUE};
       my $ret = SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeTemp','WMBus_T');
       is($ret,U(),q[verify return undef]);
@@ -136,6 +139,7 @@ InternalTimer(time()+1, sub() {
           end();
         }, 'verify sendqueue uses only volatile commands');
       is($hash->{rfmodeTemp},'WMBus_T',q[verify internal rfmodeTemp]);
+      is(\@gets,[qw(ccconf config)],q[verify ccconf and config are read back]);
       is(AttrVal('cc1101dummyDuino','rfmode',undef),U(),q[verify attribute rfmode is not changed]);
     };
 
@@ -206,22 +210,26 @@ InternalTimer(time()+1, sub() {
     };
 
     subtest 'set rfmodeRestore' => sub {
+      @gets = ();
       delete $hash->{QUEUE};
       my $ret = SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeRestore');
       is($ret,U(),q[verify return undef]);
       is($hash->{QUEUE}, array { item 'WR'; end(); }, 'verify sendqueue has WR command');
       is($hash->{rfmodeTemp},U(),q[verify internal rfmodeTemp is removed]);
+      is(\@gets,[qw(ccconf config)],q[verify ccconf and config are read back]);
     };
 
     subtest 'firmware without w, CV and WR' => sub {
       delete $hash->{QUEUE};
       delete $hash->{rfmodeTemp};
+      @gets = ();
       $hash->{cc1101_volatile} = 0;
       my $ret = SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeTemp','WMBus_T');
       like($ret,qr/firmware does not support a temporary rfmode/,q[verify error message rfmodeTemp]);
       $ret = SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeRestore');
       like($ret,qr/firmware does not support a temporary rfmode/,q[verify error message rfmodeRestore]);
       is($hash->{QUEUE},U(),q[verify sendqueue is empty]);
+      is(\@gets,[],q[verify nothing is read back]);
       is($hash->{rfmodeTemp},U(),q[verify internal rfmodeTemp is not set]);
       $hash->{cc1101_volatile} = 1;
     };
@@ -235,6 +243,7 @@ InternalTimer(time()+1, sub() {
       my $ret = SIGNALduino_Set_rfmodeTemp($defs{someDuino},'rfmodeTemp','WMBus_T');
       like($ret,qr/only available for a receiver with CC1101/,q[verify error message]);
     };
+    $mockGet->unmock;
     delete $hash->{QUEUE};
   };
 
