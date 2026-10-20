@@ -3432,16 +3432,18 @@ USB-connected devices (SIGNALduino):<br>
 
   <a name="rfmodeRestore"></a>
   <li>rfmodeRestore<br>
-    Discards a configuration set with <code>rfmodeTemp</code> and reloads the CC1101 registers and receive settings stored in the EEPROM of the uC (firmware command <code>WR</code>).
-    The uC uses the stored configuration after a restart anyway.
+    Ends a mode set with <a href="#rfmodeTemp">rfmodeTemp</a>. The uC reloads the CC1101 registers and receive settings stored in its EEPROM (firmware command <code>WR</code>), i.e. the state of the attribute <a href="#rfmode">rfmode</a>.
+    Afterwards the module reads <code>ccconf</code> and <code>config</code> again.
   </li><br>
 
   <a name="rfmodeTemp"></a>
   <li>rfmodeTemp<br>
-    Switches the CC1101 temporarily to another rfmode, like attribute <a href="#rfmode">rfmode</a>, but without writing the EEPROM of the uC (firmware commands <code>w</code> and <code>CV</code>).
-    The attribute rfmode is not changed. This is intended for regularly switching for a short time, e.g. a few seconds to WMBus_T to receive a water meter, because writing the EEPROM on every switch
-    wears out the flash of an ESP8266 or ESP32. Use <a href="#rfmodeRestore">rfmodeRestore</a> to switch back. SlowRF writes the default register values of the firmware, the PA table (cc1101_patable) is not changed.<br>
-    Requires a firmware with support of the commands <code>w</code>, <code>CV</code> and <code>WR</code>. After connecting, the module checks this with <code>get cmds</code> and sets the internal <code>cc1101_volatile</code>; without support, rfmodeTemp and rfmodeRestore are not offered and are refused.
+    Switches the CC1101 temporarily to another rfmode. Unlike the attribute <a href="#rfmode">rfmode</a>, the uC writes the settings only to the CC1101 and not to its EEPROM (firmware commands <code>w</code> and <code>CV</code>).
+    The attribute rfmode is not changed, the internal <code>rfmodeTemp</code> shows the temporarily set mode. Afterwards the module reads <code>ccconf</code> and <code>config</code> again, so the readings show the active mode.<br>
+    It is meant for frequent switching, e.g. every few minutes to WMBus_T for a few seconds for a water meter. On an ESP8266 and ESP32 every EEPROM write wears out the flash.<br>
+    For SlowRF the module writes the default registers of the firmware. The PA table (cc1101_patable) is not changed.<br>
+    Use <a href="#rfmodeRestore">rfmodeRestore</a> or restart the uC to switch back to the stored mode.<br>
+    Requires a compatible firmware, shown by the internal <code>cc1101_volatile</code>. If it is 0, rfmodeTemp and rfmodeRestore are not offered.
     <ul>example: <code>set sduino rfmodeTemp WMBus_T</code></ul>
   </li><br>
 
@@ -3556,11 +3558,11 @@ USB-connected devices (SIGNALduino):<br>
   </li><br>
   <a name="cc1101_freqOffset"></a>
   <li>cc1101_freqOffset<br>
-    Frequency offset in kHz (-500 to 500, decimal separator is a dot), added to the frequency of every <a href="#rfmode">rfmode</a> and of <a href="#rfmodeTemp">rfmodeTemp</a>.
-    It corrects the crystal deviation of the receiver once for all modes, because the deviation is nearly the same over the 868 MHz band. The attribute takes effect the next time rfmode or rfmodeTemp is set.
-    SlowRF set by the attribute rfmode (factory reset <code>e</code>) is not corrected.<br>
-    Hint: the value <code>A=</code> of a received FSK message (internal <code>&lt;IODev&gt;_FREQAFC</code> of the sensor) shows the remaining offset in steps of 1.59 kHz.
-    <ul>example: <code>attr sduino cc1101_freqOffset 77</code></ul>
+    Frequency offset of the receiver in kHz (-500 to 500, decimal separator is a dot). When <a href="#rfmode">rfmode</a> or <a href="#rfmodeTemp">rfmodeTemp</a> is set, the module adds it to the frequency of the selected mode.
+    If the crystal of a receiver deviates, one value is enough for all modes, because the offset is nearly the same over the 868 MHz band. A positive value raises the frequency.<br>
+    The attribute takes effect the next time rfmode or rfmodeTemp is set. It does not apply to SlowRF set with the attribute rfmode, because the firmware loads its factory settings then (command <code>e</code>). In this case set the frequency with <a href="#cc1101_freq">cc1101_freq</a>.<br>
+    Finding the offset: the value <code>A=</code> of a received FSK message shows the remaining offset in steps of 1.59 kHz. The internal <code>&lt;IODev&gt;_FREQAFC</code> of the sensor shows the deviation directly in kHz. Add this value to the attribute.
+    Example: a sensor is received with <code>A=50</code> (FREQAFC 79), so about <code>attr sduino cc1101_freqOffset 80</code> fits.
   </li><br>
   <a name="cc1101_frequency"></a>
   <li>cc1101_frequency<br>
@@ -4087,16 +4089,18 @@ USB-connected devices (SIGNALduino):<br>
 
   <a name="rfmodeRestore"></a>
   <li>rfmodeRestore<br>
-    Verwirft eine mit <code>rfmodeTemp</code> gesetzte Konfiguration und l&auml;dt die im EEPROM des uC gespeicherten CC1101-Register und Empfangseinstellungen neu (Firmwarebefehl <code>WR</code>).
-    Nach einem Neustart verwendet der uC die gespeicherte Konfiguration ohnehin.
+    Beendet einen mit <a href="#rfmodeTemp">rfmodeTemp</a> gesetzten Modus. Der uC l&auml;dt dazu die im EEPROM gespeicherten CC1101-Register und Empfangseinstellungen neu (Firmwarebefehl <code>WR</code>), also den Stand des Attributs <a href="#rfmode">rfmode</a>.
+    Danach liest das Modul <code>ccconf</code> und <code>config</code> neu.
   </li><br>
 
   <a name="rfmodeTemp"></a>
   <li>rfmodeTemp<br>
-    Schaltet den CC1101 vor&uuml;bergehend auf einen anderen rfmode, wie das Attribut <a href="#rfmode">rfmode</a>, schreibt dabei aber nicht in das EEPROM des uC (Firmwarebefehle <code>w</code> und <code>CV</code>).
-    Das Attribut rfmode bleibt unver&auml;ndert. Gedacht ist dies f&uuml;r regelm&auml;&szlig;iges kurzes Umschalten, z. B. f&uuml;r einige Sekunden auf WMBus_T f&uuml;r einen Wasserz&auml;hler, da das Schreiben des EEPROM bei jedem Umschalten
-    den Flash eines ESP8266 oder ESP32 abnutzt. Zur&uuml;ck geht es mit <a href="#rfmodeRestore">rfmodeRestore</a>. Bei SlowRF werden die Standardregister der Firmware geschrieben, die PA-Tabelle (cc1101_patable) bleibt unver&auml;ndert.<br>
-    Ben&ouml;tigt eine Firmware, die die Befehle <code>w</code>, <code>CV</code> und <code>WR</code> unterst&uuml;tzt. Das Modul pr&uuml;ft dies nach dem Verbinden mit <code>get cmds</code> und setzt das Internal <code>cc1101_volatile</code>; ohne Unterst&uuml;tzung werden rfmodeTemp und rfmodeRestore nicht angeboten und abgelehnt.
+    Schaltet den CC1101 vor&uuml;bergehend auf einen anderen rfmode. Anders als beim Attribut <a href="#rfmode">rfmode</a> schreibt der uC die Einstellungen nur in den CC1101 und nicht in sein EEPROM (Firmwarebefehle <code>w</code> und <code>CV</code>).
+    Das Attribut rfmode bleibt unver&auml;ndert, das Internal <code>rfmodeTemp</code> zeigt den vor&uuml;bergehend gesetzten Modus. Danach liest das Modul <code>ccconf</code> und <code>config</code> neu, damit die Readings den aktiven Modus zeigen.<br>
+    Gedacht ist das f&uuml;r h&auml;ufiges Umschalten, z. B. alle paar Minuten f&uuml;r einige Sekunden auf WMBus_T f&uuml;r einen Wasserz&auml;hler. Beim ESP8266 und ESP32 nutzt jeder Schreibvorgang ins EEPROM den Flash ab.<br>
+    Bei SlowRF schreibt das Modul die Standardregister der Firmware. Die PA-Tabelle (cc1101_patable) bleibt unver&auml;ndert.<br>
+    Zur&uuml;ck zum gespeicherten Modus geht es mit <a href="#rfmodeRestore">rfmodeRestore</a> oder mit einem Neustart des uC.<br>
+    Voraussetzung ist eine kompatible Firmware, erkennbar am Internal <code>cc1101_volatile</code>. Ist es 0, werden rfmodeTemp und rfmodeRestore nicht angeboten.
     <ul>Beispiel: <code>set sduino rfmodeTemp WMBus_T</code></ul>
   </li><br>
 
@@ -4209,11 +4213,11 @@ USB-connected devices (SIGNALduino):<br>
   </li><br>
   <a name="cc1101_freqOffset"></a>
   <li>cc1101_freqOffset<br>
-    Frequenzversatz in kHz (-500 bis 500, Dezimaltrenner ist der Punkt), der zur Frequenz jedes <a href="#rfmode">rfmode</a> und von <a href="#rfmodeTemp">rfmodeTemp</a> addiert wird.
-    Damit wird die Abweichung des Quarzes des Empf&auml;ngers einmal f&uuml;r alle Modi korrigiert, da sie &uuml;ber das 868-MHz-Band nahezu gleich ist. Das Attribut wirkt beim n&auml;chsten Setzen von rfmode oder rfmodeTemp.
-    SlowRF &uuml;ber das Attribut rfmode (Werksreset <code>e</code>) wird nicht korrigiert.<br>
-    Hinweis: Der Wert <code>A=</code> einer empfangenen FSK-Nachricht (Internal <code>&lt;IODev&gt;_FREQAFC</code> des Sensors) zeigt den verbleibenden Versatz in Schritten von 1,59 kHz.
-    <ul>Beispiel: <code>attr sduino cc1101_freqOffset 77</code></ul>
+    Frequenzversatz des Empf&auml;ngers in kHz (-500 bis 500, Dezimaltrenner ist der Punkt). Beim Setzen von <a href="#rfmode">rfmode</a> und <a href="#rfmodeTemp">rfmodeTemp</a> addiert das Modul ihn zur Frequenz des gew&auml;hlten Modus.
+    Weicht der Quarz eines Empf&auml;ngers ab, gen&uuml;gt so ein einziger Wert f&uuml;r alle Modi, weil der Versatz im 868-MHz-Band nahezu gleich ist. Ein positiver Wert erh&ouml;ht die Frequenz.<br>
+    Das Attribut wirkt erst beim n&auml;chsten Setzen von rfmode oder rfmodeTemp. Bei SlowRF &uuml;ber das Attribut rfmode gilt es nicht, weil die Firmware dabei ihre Werkseinstellungen l&auml;dt (Befehl <code>e</code>). In diesem Fall die Frequenz mit <a href="#cc1101_freq">cc1101_freq</a> einstellen.<br>
+    Versatz ermitteln: Der Wert <code>A=</code> einer empfangenen FSK-Nachricht zeigt den verbleibenden Versatz in Schritten von 1,59 kHz. Das Internal <code>&lt;IODev&gt;_FREQAFC</code> des Sensors zeigt die Abweichung direkt in kHz. Diesen Wert zum Attribut addieren.
+    Beispiel: Ein Sensor kommt mit <code>A=50</code> (FREQAFC 79) an, also passt etwa <code>attr sduino cc1101_freqOffset 80</code>.
   </li><br>
   <a name="cc1101_frequency"></a>
   <li>cc1101_frequency<br>
