@@ -1,3 +1,6 @@
+2026-10-20 - Merge pull request #1411 from RFD-FHEM/feat/rfmode-temporary
+
+feat(SIGNALduino): set rfmodeTemp and rfmodeRestore
 2026-09-21 - Merge pull request #1404 from RFD-FHEM/perf/match-precompiled-regex
 
 perf: precompile the Match regex in all modules of this repo
