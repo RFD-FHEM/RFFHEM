@@ -101,6 +101,66 @@ my @mockData = (
   },
   {
     cmd => q[set],
+    deviceName => q[dummyDuino],
+    plan => 2,
+    testname =>  q[unsupported attr cc1101_freqOffset without cc1101],
+    input =>  q[cc1101_freqOffset 77],
+    attrCheck =>  hash  {
+        field cc1101_freqOffset => DNE();
+        etc();
+      },
+      rValue => match qr/only available for a receiver with CC1101/,
+  },
+  {
+    cmd => q[set],
+    deviceName => q[cc1101dummyDuino],
+    plan => 2,
+    testname =>  q[attr cc1101_freqOffset with comma as decimal separator],
+    input =>  q[cc1101_freqOffset 77,5],
+    attrCheck =>  hash  {
+        field cc1101_freqOffset => DNE();
+        etc();
+      },
+      rValue => match qr/use a dot as decimal separator/,
+  },
+  {
+    cmd => q[set],
+    deviceName => q[cc1101dummyDuino],
+    plan => 2,
+    testname =>  q[attr cc1101_freqOffset not a number],
+    input =>  q[cc1101_freqOffset abc],
+    attrCheck =>  hash  {
+        field cc1101_freqOffset => DNE();
+        etc();
+      },
+      rValue => match qr/must be a number in kHz/,
+  },
+  {
+    cmd => q[set],
+    deviceName => q[cc1101dummyDuino],
+    plan => 2,
+    testname =>  q[attr cc1101_freqOffset out of range],
+    input =>  q[cc1101_freqOffset 600],
+    attrCheck =>  hash  {
+        field cc1101_freqOffset => DNE();
+        etc();
+      },
+      rValue => match qr/must be a number in kHz/,
+  },
+  {
+    cmd => q[set],
+    deviceName => q[cc1101dummyDuino],
+    plan => 2,
+    testname =>  q[attr cc1101_freqOffset -40.5],
+    input =>  q[cc1101_freqOffset -40.5],
+    attrCheck =>  hash  {
+        field cc1101_freqOffset => '-40.5';
+        etc();
+      },
+      rValue => U(),
+  },
+  {
+    cmd => q[set],
     deviceName => q[cc1101dummyDuino],
     plan => 2,
     testname =>  q[unsupported mode attr rfmode blafasel],

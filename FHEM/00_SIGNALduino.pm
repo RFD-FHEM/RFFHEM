@@ -1,4 +1,4 @@
-# $Id: 00_SIGNALduino.pm 0 2026-09-17 17:26:56Z sidey79 $
+# $Id: 00_SIGNALduino.pm 0 2026-10-20 16:21:15Z sidey79 $
 # https://github.com/RFD-FHEM/RFFHEM/tree/master
 # The module is inspired by the FHEMduino project and modified in serval ways for processing the incoming messages
 # see http://www.fhemwiki.de/wiki/SIGNALDuino
@@ -15,7 +15,7 @@ use strict;
 use warnings;
 use Storable qw(dclone); 
 use FHEM::Core::Utils::Math;
-#use version 0.77; our $VERSION = version->declare('v4.0.1');
+#use version 0.77; our $VERSION = version->declare('v4.0.2');
 
 my $missingModulSIGNALduino = ' ';
 
@@ -26,7 +26,7 @@ no warnings 'portable';
 
 eval {use Data::Dumper qw(Dumper);1};
 use constant {
-  SDUINO_VERSION                  => '4.0.1+20260917',  # Datum wird automatisch bei jedem pull request aktualisiert
+  SDUINO_VERSION                  => '4.0.2+20261020',  # Datum wird automatisch bei jedem pull request aktualisiert
   SDUINO_INIT_WAIT_XQ             => 1.5,     # wait disable device
   SDUINO_INIT_WAIT                => 2,
   SDUINO_INIT_MAXRETRY            => 3,
@@ -100,6 +100,8 @@ my %sets = (
   'cc1101_reg_user'     =>  ['noArg', \&FHEM::Devices::SIGNALduino::SD_CC1101::SetRegistersUser ],
   'cc1101_sens'         =>  ['4,8,12,16', \&FHEM::Devices::SIGNALduino::SD_CC1101::SetSens ],
   'LaCrossePairForSec'  =>  ['textFieldNL', \&SIGNALduino_Set_LaCrossePairForSec ],
+  'rfmodeTemp'          =>  ['textFieldNL', \&SIGNALduino_Set_rfmodeTemp ],
+  'rfmodeRestore'       =>  ['noArg', \&SIGNALduino_Set_rfmodeRestore ],
 );
 
 ## Supported config CC1101 ##
@@ -123,7 +125,7 @@ sub SIGNALduino_Initialize {
   my $dev = '';
   $dev = ',1' if (index(SDUINO_VERSION, 'dev') >= 0);
 
-  my $error = $Protocols->LoadHash(qq[./lib/FHEM/Devices/SIGNALduino/SD_Protocols/Data.pm]); 
+  my $error = $Protocols->LoadHash(qq[$attr{global}{modpath}/lib/FHEM/Devices/SIGNALduino/SD_Protocols/Data.pm]);
   
 
   if (defined($error)) {
@@ -134,6 +136,7 @@ sub SIGNALduino_Initialize {
     push @rfmode, map { $Protocols->checkProperty($_, 'rfmode') } $Protocols->getKeys('rfmode');    
     @rfmode = sort @rfmode;
     Log3 'SIGNALduino', 4, qq[SIGNALduino_Initialize: rfmode list: @rfmode];
+    $sets{rfmodeTemp}[0] = join(',', @rfmode);
   }
 
   $hash->{DefFn}          = \&SIGNALduino_Define;
@@ -155,6 +158,7 @@ sub SIGNALduino_Initialize {
             .' WS09_CRCAUS:0,1,2'
             .' addvaltrigger'
             .' blacklist_IDs'
+            .' cc1101_freqOffset'
             .' cc1101_frequency'
             .' cc1101_reg_user'
             ." debug:0$dev"
@@ -346,7 +350,7 @@ sub SIGNALduino_Set_FhemWebList {
       (
         ( IsDummy($hash->{NAME}) && $_ =~ m/^(?:close|reset|LaCrossePairForSec)/ ) ||
         ($_ =~ m/^LaCrossePairForSec/ && ReadingsVal($hash->{NAME},'cc1101_config_ext','') =~ '2-FSK') ||       
-        ( (InternalVal($hash->{NAME},'cc1101_available',0 ) || (!InternalVal($hash->{NAME},'cc1101_available',0) && $_ !~ /^cc/ )) && $_ !~ m/^LaCrossePairForSec/) &&
+        ( (InternalVal($hash->{NAME},'cc1101_available',0 ) || $_ !~ /^cc/ ) && (InternalVal($hash->{NAME},'cc1101_volatile',0) || $_ !~ /^rfmode/ ) && $_ !~ m/^LaCrossePairForSec/) &&
         ( !IsDummy($hash->{NAME}) && (defined(DevIo_IsOpen($hash)) || $_ =~ m/^(?:flash|reset)/)  )
       )
     )
@@ -385,6 +389,10 @@ sub SIGNALduino_Set_reset
 sub SIGNALduino_Attr_rfmode {
   my $hash = shift // carp 'must be called with hash of iodevice as first param';
   my $aVal = shift // return;
+  my $volatile = shift // 0;   # 1 = write only the CC1101 (firmware commands w and CV), the EEPROM keeps the configuration
+
+  my $cmdWrite = $volatile ? 'w' : 'W';
+  my $cmdConfig = $volatile ? 'CV' : 'C';
 
   if ( (InternalVal($hash->{NAME},"cc1101_available",0) == 0) && (!IsDummy($hash->{NAME})) ) {
     return 'ERROR: This rfmode is only available for a receiver with CC1101.';
@@ -396,9 +404,9 @@ sub SIGNALduino_Attr_rfmode {
   
   ## DevState waitInit is on first start after FHEM restart | initialized is after cc1101 available
   if ( ($hash->{DevState} eq 'initialized') && (InternalVal($hash->{NAME},"cc1101_available",0) == 1) ) {
-    $hash->{logMethod}->($hash->{NAME}, 3, "$hash->{NAME}: Set_rfmode, set to $aVal on DevState $hash->{DevState} (please check activated protocols via 'Display protocollist')");
+    $hash->{logMethod}->($hash->{NAME}, $volatile ? 4 : 3, "$hash->{NAME}: Set_rfmode, set to $aVal on DevState $hash->{DevState} (please check activated protocols via 'Display protocollist')");
 
-    SIGNALduino_AddSendQueue($hash,'CDW'); # disable WMBus
+    SIGNALduino_AddSendQueue($hash,$cmdConfig.'DW'); # disable WMBus
     my $rfmode;
     if ($aVal ne 'SlowRF') {
       if ( scalar( @{$hash->{mnIdList}} ) >= 1 ) {
@@ -412,21 +420,14 @@ sub SIGNALduino_Attr_rfmode {
 
             if ($register != -1) {
               $hash->{logMethod}->($hash->{NAME}, 5, qq[$hash->{NAME}: Set_rfmode, register settings exist on ID=$id ]);
-              SIGNALduino_AddSendQueue($hash,'WS36');   # SIDLE, Exit RX / TX, turn off frequency synthesizer
-              SIGNALduino_AddSendQueue($hash,'WS3A');   # SFRX, Flush the RX FIFO buffer. Only issue SFRX in IDLE or RXFIFO_OVERFLOW states.
-              for my $i (0...scalar(@{$register})-1) {
-                $hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_rfmode, write value " . @{$register}[$i]);
-                my $argcmd = sprintf("W%02X%s",hex(substr(@{$register}[$i],0,2)) + 2,substr(@{$register}[$i],2,2));
-                main::SIGNALduino_AddSendQueue($hash,$argcmd);
-              }
-              main::SIGNALduino_WriteInit($hash); # set cc1101 SIDLE and then SRX
+              SIGNALduino_rfmode_WriteRegister($hash,$cmdWrite,$register);
               if ($rfmode =~ /^WMBus_/) {
                 if ($rfmode eq 'WMBus_S') {
-                  SIGNALduino_AddSendQueue($hash,'CDT'); # WMBus_S
+                  SIGNALduino_AddSendQueue($hash,$cmdConfig.'DT'); # WMBus_S
                 } else {
-                  SIGNALduino_AddSendQueue($hash,'CET'); # enable WMBus_T
+                  SIGNALduino_AddSendQueue($hash,$cmdConfig.'ET'); # enable WMBus_T
                 }
-                SIGNALduino_AddSendQueue($hash,'CEW');   # enable WMBus
+                SIGNALduino_AddSendQueue($hash,$cmdConfig.'EW');   # enable WMBus
               }
               last MNIDLIST;  # found $rfmode, exit loop
             } else {
@@ -443,12 +444,91 @@ sub SIGNALduino_Attr_rfmode {
         $hash->{logMethod}->($hash->{NAME}, 3, qq[$hash->{NAME}: Set_rfmode, no MN protocols in 'Display protocollist' activated]);
         return 'ERROR: no MN protocols activated in \'Display protocollist\'';
       }
+    } elsif ($volatile) {
+      SIGNALduino_rfmode_WriteRegister($hash,$cmdWrite,\@FHEM::Devices::SIGNALduino::SD_CC1101::cc1101_factory_register);
     } else {
       SIGNALduino_AddSendQueue($hash,'e');
       $hash->{logMethod}->($hash->{NAME}, 1, "$hash->{NAME}: Set_rfmode, set to $aVal (ASK/OOK mode load default register settings from uC)");
     }
   }
 
+  return;
+}
+
+############################# package main
+# add attribute cc1101_freqOffset (kHz) to the frequency registers 0D..0F (FREQ2..FREQ0) of a register list,
+# it corrects the crystal deviation of a receiver once for all rfmodes
+sub SIGNALduino_rfmode_FreqOffset {
+  my ($hash, $register) = @_;
+
+  my $offset = AttrVal($hash->{NAME},'cc1101_freqOffset',0);
+  return $register if ($offset == 0);
+
+  my %reg = map { uc(substr($_,0,2)) => hex(substr($_,2,2)) } @{$register};
+  return $register if (grep { !exists $reg{$_} } qw(0D 0E 0F));
+
+  my $steps = $offset * 65536 / 26000;   # 26 MHz / 2^16 = 0.397 kHz per step
+  my $freq = ($reg{'0D'} << 16 | $reg{'0E'} << 8 | $reg{'0F'}) + int($steps + ($steps < 0 ? -0.5 : 0.5));
+  my %new = ('0D' => $freq >> 16 & 0xFF, '0E' => $freq >> 8 & 0xFF, '0F' => $freq & 0xFF);
+  $hash->{logMethod}->($hash->{NAME}, 4, sprintf("%s: rfmode_FreqOffset, %+g kHz, frequency %.3f MHz",$hash->{NAME},$offset,$freq * 26 / 65536));
+
+  return [ map { my $r = uc(substr($_,0,2)); exists $new{$r} ? sprintf('%s%02X',$r,$new{$r}) : $_ } @{$register} ];
+}
+
+############################# package main
+# write a register list (entries 'RRVV', register and value as hex) to the CC1101, $cmdWrite is W (EEPROM) or w (CC1101 only)
+sub SIGNALduino_rfmode_WriteRegister {
+  my ($hash, $cmdWrite, $register) = @_;
+
+  $register = SIGNALduino_rfmode_FreqOffset($hash,$register);
+  SIGNALduino_AddSendQueue($hash,'WS36');   # SIDLE, Exit RX / TX, turn off frequency synthesizer
+  SIGNALduino_AddSendQueue($hash,'WS3A');   # SFRX, Flush the RX FIFO buffer. Only issue SFRX in IDLE or RXFIFO_OVERFLOW states.
+  for my $reg (@{$register}) {
+    $hash->{logMethod}->($hash->{NAME}, 5, "$hash->{NAME}: Set_rfmode, write value $reg");
+    SIGNALduino_AddSendQueue($hash,sprintf("%s%02X%s",$cmdWrite,hex(substr($reg,0,2)) + 2,substr($reg,2,2)));
+  }
+  SIGNALduino_WriteInit($hash); # set cc1101 SIDLE and then SRX
+  return;
+}
+
+############################# package main
+# switch the CC1101 to another rfmode without writing the EEPROM, attribute rfmode is not changed
+sub SIGNALduino_Set_rfmodeTemp {
+  my ($hash, @a) = @_;
+  my $aVal = $a[1] // return 'ERROR: missing rfmode';
+
+  if (!first { $_ eq $aVal } @rfmode) {
+    return 'ERROR: The rfmode is not supported';
+  }
+  if (InternalVal($hash->{NAME},'cc1101_available',0) && !InternalVal($hash->{NAME},'cc1101_volatile',0)) {
+    return 'ERROR: The firmware does not support a temporary rfmode (commands w, CV and WR), please update the firmware';
+  }
+  my $ret = SIGNALduino_Attr_rfmode($hash,$aVal,1);
+  return $ret if (defined $ret);
+
+  $hash->{rfmodeTemp} = $aVal;
+  $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_rfmodeTemp, switched temporarily to $aVal");
+  SIGNALduino_Get($hash,$hash->{NAME},'ccconf');
+  SIGNALduino_Get($hash,$hash->{NAME},'config');
+  return;
+}
+
+############################# package main
+# reload the CC1101 configuration stored in the EEPROM of the uC (rfmode attribute)
+sub SIGNALduino_Set_rfmodeRestore {
+  my $hash = shift;
+
+  if (InternalVal($hash->{NAME},'cc1101_available',0) == 0) {
+    return 'ERROR: This command is only available for a receiver with CC1101.';
+  }
+  if (!InternalVal($hash->{NAME},'cc1101_volatile',0)) {
+    return 'ERROR: The firmware does not support a temporary rfmode (commands w, CV and WR), please update the firmware';
+  }
+  SIGNALduino_AddSendQueue($hash,'WR');
+  delete $hash->{rfmodeTemp};
+  $hash->{logMethod}->($hash->{NAME}, 4, "$hash->{NAME}: Set_rfmodeRestore, configuration reloaded from EEPROM");
+  SIGNALduino_Get($hash,$hash->{NAME},'ccconf');
+  SIGNALduino_Get($hash,$hash->{NAME},'config');
   return;
 }
 
@@ -799,6 +879,7 @@ sub SIGNALduino_CheckCmdsResponse {
 
   $msg =~ s/$name cmds =>//g;
   $msg =~ s/.*Use one of//g;
+  $hash->{cc1101_volatile} = ($msg =~ m/\sw\s/) ? 1 : 0;   # firmware supports w, CV and WR (rfmodeTemp, rfmodeRestore)
 
   return ($msg,0);
 }
@@ -2437,6 +2518,13 @@ sub SIGNALduino_Attr {
     return "Note, please use other userReadings names.\nReserved names from $name are: cc1101_config, cc1101_config_ext, cc1101_patable"
       if ($aVal =~ /cc1101_(?:config(?:_ext)?|patable)(?:\s|{)/);
   }
+  ## Change cc1101_freqOffset
+  elsif ($aName eq 'cc1101_freqOffset' && $cmd eq 'set') # frequency offset in kHz for every rfmode
+  {
+    return 'ERROR: This attribute is only available for a receiver with CC1101.' if ( ($init_done == 1) && (InternalVal($hash->{NAME},"cc1101_available",0) == 0) );
+    return 'ERROR: Please use a dot as decimal separator, e.g. 77.5' if ($aVal =~ /,/);
+    return 'ERROR: The frequency offset must be a number in kHz between -500 and 500' if ($aVal !~ /^[+-]?\d+(?:\.\d+)?$/ || abs($aVal) > 500);
+  }
   ## Change cc1101_reg_user
   elsif ($aName eq 'cc1101_reg_user' && $cmd eq 'set') # set default register
   {
@@ -3342,6 +3430,23 @@ USB-connected devices (SIGNALduino):<br>
     This will do a reset of the usb port and normaly causes to reset the uC connected.
   </li><br>
 
+  <a name="rfmodeRestore"></a>
+  <li>rfmodeRestore<br>
+    Ends a mode set with <a href="#rfmodeTemp">rfmodeTemp</a>. The uC reloads the CC1101 registers and receive settings stored in its EEPROM (firmware command <code>WR</code>), i.e. the state of the attribute <a href="#rfmode">rfmode</a>.
+    Afterwards the module reads <code>ccconf</code> and <code>config</code> again.
+  </li><br>
+
+  <a name="rfmodeTemp"></a>
+  <li>rfmodeTemp<br>
+    Switches the CC1101 temporarily to another rfmode. Unlike the attribute <a href="#rfmode">rfmode</a>, the uC writes the settings only to the CC1101 and not to its EEPROM (firmware commands <code>w</code> and <code>CV</code>).
+    The attribute rfmode is not changed, the internal <code>rfmodeTemp</code> shows the temporarily set mode. Afterwards the module reads <code>ccconf</code> and <code>config</code> again, so the readings show the active mode.<br>
+    It is meant for frequent switching, e.g. every few minutes to WMBus_T for a few seconds for a water meter. On an ESP8266 and ESP32 every EEPROM write wears out the flash.<br>
+    For SlowRF the module writes the default registers of the firmware. The PA table (cc1101_patable) is not changed.<br>
+    Use <a href="#rfmodeRestore">rfmodeRestore</a> or restart the uC to switch back to the stored mode.<br>
+    Requires a compatible firmware, shown by the internal <code>cc1101_volatile</code>. If it is 0, rfmodeTemp and rfmodeRestore are not offered.
+    <ul>example: <code>set sduino rfmodeTemp WMBus_T</code></ul>
+  </li><br>
+
   <a name="sendMsg"></a>
   <li>sendMsg<br>
     This command will create the needed instructions for sending raw data via the signalduino. Insteaf of specifying the signaldata by your own you specify
@@ -3450,6 +3555,14 @@ USB-connected devices (SIGNALduino):<br>
   <a name="blacklist_IDs"></a>
   <li>blacklist_IDs<br>
     The blacklist works only if a whitelist not exist.
+  </li><br>
+  <a name="cc1101_freqOffset"></a>
+  <li>cc1101_freqOffset<br>
+    Frequency offset of the receiver in kHz (-500 to 500, decimal separator is a dot). When <a href="#rfmode">rfmode</a> or <a href="#rfmodeTemp">rfmodeTemp</a> is set, the module adds it to the frequency of the selected mode.
+    If the crystal of a receiver deviates, one value is enough for all modes, because the offset is nearly the same over the 868 MHz band. A positive value raises the frequency.<br>
+    The attribute takes effect the next time rfmode or rfmodeTemp is set. It does not apply to SlowRF set with the attribute rfmode, because the firmware loads its factory settings then (command <code>e</code>). In this case set the frequency with <a href="#cc1101_freq">cc1101_freq</a>.<br>
+    Finding the offset: the value <code>A=</code> of a received FSK message shows the remaining offset in steps of 1.59 kHz. The internal <code>&lt;IODev&gt;_FREQAFC</code> of the sensor shows the deviation directly in kHz. Add this value to the attribute.
+    Example: a sensor is received with <code>A=50</code> (FREQAFC 79), so about <code>attr sduino cc1101_freqOffset 80</code> fits.
   </li><br>
   <a name="cc1101_frequency"></a>
   <li>cc1101_frequency<br>
@@ -3974,6 +4087,23 @@ USB-connected devices (SIGNALduino):<br>
     &Ouml;ffnet die Verbindung zum Ger&auml;t neu und initialisiert es.
   </li><br>
 
+  <a name="rfmodeRestore"></a>
+  <li>rfmodeRestore<br>
+    Beendet einen mit <a href="#rfmodeTemp">rfmodeTemp</a> gesetzten Modus. Der uC l&auml;dt dazu die im EEPROM gespeicherten CC1101-Register und Empfangseinstellungen neu (Firmwarebefehl <code>WR</code>), also den Stand des Attributs <a href="#rfmode">rfmode</a>.
+    Danach liest das Modul <code>ccconf</code> und <code>config</code> neu.
+  </li><br>
+
+  <a name="rfmodeTemp"></a>
+  <li>rfmodeTemp<br>
+    Schaltet den CC1101 vor&uuml;bergehend auf einen anderen rfmode. Anders als beim Attribut <a href="#rfmode">rfmode</a> schreibt der uC die Einstellungen nur in den CC1101 und nicht in sein EEPROM (Firmwarebefehle <code>w</code> und <code>CV</code>).
+    Das Attribut rfmode bleibt unver&auml;ndert, das Internal <code>rfmodeTemp</code> zeigt den vor&uuml;bergehend gesetzten Modus. Danach liest das Modul <code>ccconf</code> und <code>config</code> neu, damit die Readings den aktiven Modus zeigen.<br>
+    Gedacht ist das f&uuml;r h&auml;ufiges Umschalten, z. B. alle paar Minuten f&uuml;r einige Sekunden auf WMBus_T f&uuml;r einen Wasserz&auml;hler. Beim ESP8266 und ESP32 nutzt jeder Schreibvorgang ins EEPROM den Flash ab.<br>
+    Bei SlowRF schreibt das Modul die Standardregister der Firmware. Die PA-Tabelle (cc1101_patable) bleibt unver&auml;ndert.<br>
+    Zur&uuml;ck zum gespeicherten Modus geht es mit <a href="#rfmodeRestore">rfmodeRestore</a> oder mit einem Neustart des uC.<br>
+    Voraussetzung ist eine kompatible Firmware, erkennbar am Internal <code>cc1101_volatile</code>. Ist es 0, werden rfmodeTemp und rfmodeRestore nicht angeboten.
+    <ul>Beispiel: <code>set sduino rfmodeTemp WMBus_T</code></ul>
+  </li><br>
+
   <a name="sendMsg"></a>
   <li>sendMsg<br>
     Dieser Befehl erstellt die erforderlichen Anweisungen zum Senden von Rohdaten &uuml;ber den SIGNALduino. Sie k&ouml;nnen die Signaldaten wie Protokoll und die Bits angeben, die Sie senden m&ouml;chten.<br>
@@ -4080,6 +4210,14 @@ USB-connected devices (SIGNALduino):<br>
   <a name="blacklist_IDs"></a>
   <li>blacklist_IDs<br>
     Dies ist eine durch Komma getrennte Liste. Die Blacklist funktioniert nur, wenn keine Whitelist existiert! Hier kann man ID´s eintragen welche man nicht ausgewertet haben m&ouml;chte.
+  </li><br>
+  <a name="cc1101_freqOffset"></a>
+  <li>cc1101_freqOffset<br>
+    Frequenzversatz des Empf&auml;ngers in kHz (-500 bis 500, Dezimaltrenner ist der Punkt). Beim Setzen von <a href="#rfmode">rfmode</a> und <a href="#rfmodeTemp">rfmodeTemp</a> addiert das Modul ihn zur Frequenz des gew&auml;hlten Modus.
+    Weicht der Quarz eines Empf&auml;ngers ab, gen&uuml;gt so ein einziger Wert f&uuml;r alle Modi, weil der Versatz im 868-MHz-Band nahezu gleich ist. Ein positiver Wert erh&ouml;ht die Frequenz.<br>
+    Das Attribut wirkt erst beim n&auml;chsten Setzen von rfmode oder rfmodeTemp. Bei SlowRF &uuml;ber das Attribut rfmode gilt es nicht, weil die Firmware dabei ihre Werkseinstellungen l&auml;dt (Befehl <code>e</code>). In diesem Fall die Frequenz mit <a href="#cc1101_freq">cc1101_freq</a> einstellen.<br>
+    Versatz ermitteln: Der Wert <code>A=</code> einer empfangenen FSK-Nachricht zeigt den verbleibenden Versatz in Schritten von 1,59 kHz. Das Internal <code>&lt;IODev&gt;_FREQAFC</code> des Sensors zeigt die Abweichung direkt in kHz. Diesen Wert zum Attribut addieren.
+    Beispiel: Ein Sensor kommt mit <code>A=50</code> (FREQAFC 79) an, also passt etwa <code>attr sduino cc1101_freqOffset 80</code>.
   </li><br>
   <a name="cc1101_frequency"></a>
   <li>cc1101_frequency<br>
@@ -4483,7 +4621,7 @@ USB-connected devices (SIGNALduino):<br>
       "web": "https://wiki.fhem.de/wiki/SIGNALduino"
     }
   },
-  "version": "v4.0.1"
+  "version": "v4.0.2"
 }
 =end :application/json;q=META.json
 =cut

@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 use Test2::V0;
-use Test2::Tools::Compare qw{is item U D like hash array bag};
+use Test2::Tools::Compare qw{is item U D like hash array bag match end exact_ref};
 use Mock::Sub;
 use Test2::Todo;
 
@@ -92,6 +92,159 @@ InternalTimer(time()+1, sub() {
       is($ret,q[ERROR: no MN protocols activated in 'Display protocollist'],q[verify return without id enabled ]);
       is(FhemTestUtils_gotLog(".*no MN protocols in 'Display protocollist' activated.*"), 1, 'Verify no MN protocol activated');
     };
+  };
+
+  subtest 'rfmode temporary (volatile) on initalized cc1101dummyDuino receiver' => sub {
+    my $hash = $defs{cc1101dummyDuino};
+    CommandDeleteAttr(undef, qq[cc1101dummyDuino whitelist_IDs]);
+    CommandAttr(undef, qq[cc1101dummyDuino hardware esp32cc1101]);
+    $hash->{cc1101_volatile} = 1;   # firmware supports w, CV and WR
+    my @gets;
+    my $mockGet = Mock::Sub->new->mock(q[main::SIGNALduino_Get], side_effect => sub { push @gets, $_[2]; return });
+
+    subtest 'Attr_rfmode persistent writes EEPROM commands' => sub {
+      delete $hash->{QUEUE};
+      my $ret = SIGNALduino_Attr_rfmode($hash,'WMBus_T');
+      is($ret,U(),q[verify return undef]);
+      is($hash->{QUEUE}, array {
+          item 'CDW';
+          item 'WS36';
+          item 'WS3A';
+          item match qr/^W[0-9A-F]{4}$/ for 1..23;
+          item 'WS36';
+          item 'WS3A';
+          item 'WS34';
+          item 'CET';
+          item 'CEW';
+          end();
+        }, 'verify sendqueue uses W and C commands');
+    };
+
+    subtest 'set rfmodeTemp WMBus_T' => sub {
+      @gets = ();
+      delete $hash->{QUEUE};
+      my $ret = SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeTemp','WMBus_T');
+      is($ret,U(),q[verify return undef]);
+      is($hash->{QUEUE}, array {
+          item 'CVDW';
+          item 'WS36';
+          item 'WS3A';
+          item 'w0206';
+          item match qr/^w[0-9A-F]{4}$/ for 1..22;
+          item 'WS36';
+          item 'WS3A';
+          item 'WS34';
+          item 'CVET';
+          item 'CVEW';
+          end();
+        }, 'verify sendqueue uses only volatile commands');
+      is($hash->{rfmodeTemp},'WMBus_T',q[verify internal rfmodeTemp]);
+      is(\@gets,[qw(ccconf config)],q[verify ccconf and config are read back]);
+      is(AttrVal('cc1101dummyDuino','rfmode',undef),U(),q[verify attribute rfmode is not changed]);
+    };
+
+    subtest 'set rfmodeTemp SlowRF' => sub {
+      delete $hash->{QUEUE};
+      my $ret = SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeTemp','SlowRF');
+      is($ret,U(),q[verify return undef]);
+      # default register values of the firmware (cc1101::initVal), EEPROM address = register + 2
+      is($hash->{QUEUE}, array {
+          item 'CVDW';
+          item 'WS36';
+          item 'WS3A';
+          item $_ for qw(w020D w032E w042D w0547 w06D3 w0791 w083D w0904);
+          item $_ for qw(w0A32 w0B00 w0C00 w0D06 w0E00 w0F10 w10B0 w1171);
+          item $_ for qw(w1257 w13C4 w1430 w1523 w16B9 w1700 w1807 w1900);
+          item $_ for qw(w1A18 w1B14 w1C6C w1D07 w1E00 w1F91 w2087 w216B);
+          item $_ for qw(w22F8 w23B6 w2411 w25E9 w262A w2700 w281F w2941);
+          item $_ for qw(w2A00);
+          item 'WS36';
+          item 'WS3A';
+          item 'WS34';
+          end();
+        }, 'verify sendqueue writes the default registers without factory reset');
+      is($hash->{rfmodeTemp},'SlowRF',q[verify internal rfmodeTemp]);
+    };
+
+    subtest 'set rfmodeTemp on not initialized receiver' => sub {
+      delete $hash->{QUEUE};
+      delete $hash->{rfmodeTemp};
+      $hash->{DevState} = 'waitInit';
+      my $ret = SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeTemp','WMBus_T');
+      $hash->{DevState} = 'initialized';
+      like($ret,qr/is not active/,q[verify error message from SIGNALduino_Set]);
+      is($hash->{QUEUE},U(),q[verify sendqueue is empty]);
+      is($hash->{rfmodeTemp},U(),q[verify internal rfmodeTemp is not set]);
+    };
+
+    subtest 'attribute cc1101_freqOffset' => sub {
+      my $freq = sub { [ grep { /^[Ww](?:0F|10|11)[0-9A-F]{2}$/ } @{$hash->{QUEUE} // []} ] };
+
+      CommandAttr(undef, qq[cc1101dummyDuino cc1101_freqOffset 80]);
+      delete $hash->{QUEUE};
+      is(SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeTemp','WMBus_T'),U(),q[rfmodeTemp WMBus_T with offset]);
+      is($freq->(),['w0F21','w106C','w119A'],q[868.950 MHz + 80 kHz = 869.030 MHz written volatile]);
+
+      CommandAttr(undef, qq[cc1101dummyDuino cc1101_freqOffset -40]);
+      delete $hash->{QUEUE};
+      is(SIGNALduino_Attr_rfmode($hash,'WMBus_T'),U(),q[attr rfmode WMBus_T with negative offset]);
+      is($freq->(),['W0F21','W106B','W116B'],q[868.950 MHz - 40 kHz written to EEPROM]);
+
+      is(SIGNALduino_rfmode_FreqOffset($hash,['1230','1500']),['1230','1500'],q[register list without frequency is not changed]);
+      is(SIGNALduino_rfmode_FreqOffset($hash,['0d21','0e65','0fe8','1202']),['0D21','0E65','0F83','1202'],q[lower case list 868.350 MHz - 40 kHz = 868.310 MHz]);
+
+      CommandDeleteAttr(undef, qq[cc1101dummyDuino cc1101_freqOffset]);
+      my $list = ['0D21','0E65','0FE8'];
+      is(SIGNALduino_rfmode_FreqOffset($hash,$list),exact_ref($list),q[without attribute the list is returned unchanged]);
+      delete $hash->{QUEUE};
+    };
+
+    subtest 'set rfmodeTemp blafasel' => sub {
+      my $ret = SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeTemp','blafasel');
+      is($ret,q[ERROR: The rfmode is not supported],q[verify error message]);
+    };
+
+    subtest 'set rfmodeTemp without argument' => sub {
+      my $ret = SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeTemp');
+      is($ret,q[ERROR: missing rfmode],q[verify error message]);
+    };
+
+    subtest 'set rfmodeRestore' => sub {
+      @gets = ();
+      delete $hash->{QUEUE};
+      my $ret = SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeRestore');
+      is($ret,U(),q[verify return undef]);
+      is($hash->{QUEUE}, array { item 'WR'; end(); }, 'verify sendqueue has WR command');
+      is($hash->{rfmodeTemp},U(),q[verify internal rfmodeTemp is removed]);
+      is(\@gets,[qw(ccconf config)],q[verify ccconf and config are read back]);
+    };
+
+    subtest 'firmware without w, CV and WR' => sub {
+      delete $hash->{QUEUE};
+      delete $hash->{rfmodeTemp};
+      @gets = ();
+      $hash->{cc1101_volatile} = 0;
+      my $ret = SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeTemp','WMBus_T');
+      like($ret,qr/firmware does not support a temporary rfmode/,q[verify error message rfmodeTemp]);
+      $ret = SIGNALduino_Set($hash,'cc1101dummyDuino','rfmodeRestore');
+      like($ret,qr/firmware does not support a temporary rfmode/,q[verify error message rfmodeRestore]);
+      is($hash->{QUEUE},U(),q[verify sendqueue is empty]);
+      is(\@gets,[],q[verify nothing is read back]);
+      is($hash->{rfmodeTemp},U(),q[verify internal rfmodeTemp is not set]);
+      $hash->{cc1101_volatile} = 1;
+    };
+
+    subtest 'set rfmodeRestore without cc1101' => sub {
+      my $ret = SIGNALduino_Set_rfmodeRestore($defs{dummyDuino},'rfmodeRestore');
+      like($ret,qr/only available for a receiver with CC1101/,q[verify error message]);
+    };
+
+    subtest 'set rfmodeTemp without cc1101' => sub {
+      my $ret = SIGNALduino_Set_rfmodeTemp($defs{someDuino},'rfmodeTemp','WMBus_T');
+      like($ret,qr/only available for a receiver with CC1101/,q[verify error message]);
+    };
+    $mockGet->unmock;
+    delete $hash->{QUEUE};
   };
 
   done_testing();
