@@ -14,9 +14,15 @@ InternalTimer(time()+1, sub {
 
 
 	subtest 'Test SIGNALduino_CheckCmdsResponse ' => sub {
-		plan(1);
+		plan(4);
 		my ($ret,undef)=SIGNALduino_CheckCmdsResponse($targetHash,"$target cmds => .*Use one of V R t X S P C r W s x e");
 		is($ret," V R t X S P C r W s x e","check return value");
+		is($targetHash->{cc1101_volatile},0,"firmware without w: cc1101_volatile = 0");
+
+		($ret,undef)=SIGNALduino_CheckCmdsResponse($targetHash,"$target cmds => .*Use one of V R t X S P C r W s w x e ");
+		is($ret," V R t X S P C r W s w x e ","check return value with w");
+		is($targetHash->{cc1101_volatile},1,"firmware with w: cc1101_volatile = 1");
+		delete $targetHash->{cc1101_volatile};
 	}; 
 
 	subtest 'Test with unset version' => sub {

@@ -9,7 +9,7 @@ our %defs;
 InternalTimer(time()+1, sub {
     my $target		= shift;
     my $targetHash 	= $defs{$target};
-	plan(6);
+	plan(7);
 
 	subtest 'Test SIGNALduino_CheckVersionResp ' => sub {
 		plan(1);
@@ -45,6 +45,26 @@ InternalTimer(time()+1, sub {
 		my ($ret,undef)=SIGNALduino_CheckVersionResp($targetHash,"no version from device");
 		like($ret,qr/^$target: CheckVersionResp, Not an SIGNALduino device, got for V: no version from device/,"check return message");
 	}; 
+
+	subtest 'Test SIGNALduino_CheckVersionResp reads cc1101 config and supported commands' => sub {
+		plan(1);
+		my $mock = Test2::Mock->new(
+			track => 1,
+			class => 'main',
+			override => [
+				SIGNALduino_SimpleWrite => sub { 0 },
+				SIGNALduino_Get => sub { 0 },
+			],
+		);
+		my $tracking = $mock->sub_tracking;
+		$targetHash->{ucCmd}->{cmd} = "version";
+		SIGNALduino_CheckVersionResp($targetHash,"V 4.0.11b SIGNALESP cc1101 (chip CC1101) - compiled at Oct 18 2026 20:16:00");
+		is([map { $_->{args}[2] } @{$tracking->{SIGNALduino_Get} // []}],[qw(ccconf ccpatable cmds)],"get cmds called to detect cc1101_volatile");
+		$mock->restore('SIGNALduino_SimpleWrite');
+		$mock->restore('SIGNALduino_Get');
+		delete $targetHash->{$_} for qw(version cc1101_available);
+		delete $targetHash->{$_} for qw(version cc1101_available);
+	};
 
 	subtest 'Test SIGNALduino_CheckVersionResp timeout' => sub {
 		plan(1);
