@@ -77,7 +77,7 @@ jobs:
         install-modules-args: --no-interactive -v --installdeps
 
     - name: Install FHEM via debian nightly
-      uses: fhem/setup-fhem@v1.0.1
+      uses: fhem/setup-fhem@v1.0.2
       
     - name: change ownership of /opt/fhem
       run: |
