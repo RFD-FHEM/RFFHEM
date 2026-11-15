@@ -1,3 +1,7 @@
+2026-11-15 - no autocreate for WMBUS devices (#1418)
+
+* Update SD_Matchlist.pm
+Bugfix WMBUS
 2026-10-20 - Merge pull request #1411 from RFD-FHEM/feat/rfmode-temporary
 
 feat(SIGNALduino): set rfmodeTemp and rfmodeRestore

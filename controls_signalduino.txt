@@ -18,7 +18,7 @@ UPD 2026-07-04_19:42:43 1824 lib/FHEM/Devices/SIGNALduino/SD_Clients.pm
 UPD 2026-09-17_19:26:23 30012 lib/FHEM/Devices/SIGNALduino/SD_Firmware.pm
 UPD 2026-10-19_22:36:42 13101 lib/FHEM/Devices/SIGNALduino/SD_IO.pm
 UPD 2026-07-04_19:42:43 1367 lib/FHEM/Devices/SIGNALduino/SD_Logger.pm
-UPD 2026-11-15_16:17:21 4913 lib/FHEM/Devices/SIGNALduino/SD_Matchlist.pm
+UPD 2026-11-15_17:25:40 4913 lib/FHEM/Devices/SIGNALduino/SD_Matchlist.pm
 UPD 2026-07-04_19:42:43 6333 lib/FHEM/Devices/SIGNALduino/SD_Message.pm
 UPD 2026-02-18_23:27:27 83387 lib/FHEM/Devices/SIGNALduino/SD_Protocols.pm
 UPD 2026-07-04_19:42:43 4115 lib/FHEM/Devices/SIGNALduino/SD_Utils.pm
