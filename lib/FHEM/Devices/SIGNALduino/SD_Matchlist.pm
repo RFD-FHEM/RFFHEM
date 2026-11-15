@@ -43,6 +43,7 @@ my %matchList = (
       '31:KOPP_FC'          => '^kr\w{18,}',
       '32:PCA301'           => '^\\S+\\s+24',
       '33:SD_Rojaflex'      => '^P109#[A-Fa-f0-9]+',
+      '34:WMBUS'            => '^b.*',
       'X:SIGNALduino_un'    => '^[u]\d+#.*',
 );
 
