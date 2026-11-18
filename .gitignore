@@ -15,3 +15,4 @@ workspace.code-workspace
 .gitconfig
 testOutput.*
 .roo/mcp.json
+.devcontainer/devcontainer.local.json
