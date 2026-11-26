@@ -3589,7 +3589,7 @@ package FHEM::Devices::SIGNALduino::SD_Protocols::Data;
         modulation      => '2-FSK',
         sync            => '543D',
         rfmode          => 'WMBus_T',
-        register        => ['0006','0200','0340','0454','053D','06FF','0704','0802','0B08','0D21','0E6B','0FD0','105C','1104','1206','1322','14F8','1544','192E','1ABF','1BC7','1C09','1DB2'],
+        register        => ['0006','0200','0340','0454','053D','06FF','0704','0802','0B08','0D21','0E6B','0FD0','105C','1104','1206','1322','14F8','1544','192E','1ABF','1B43','1C09','1DB5'],
         length_min      => '56',      # to filter messages | must check
         clientmodule    => 'WMBUS',
       },
