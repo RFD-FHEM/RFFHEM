@@ -22,4 +22,4 @@ UPD 2026-11-15_17:25:40 4913 lib/FHEM/Devices/SIGNALduino/SD_Matchlist.pm
 UPD 2026-07-04_19:42:43 6333 lib/FHEM/Devices/SIGNALduino/SD_Message.pm
 UPD 2026-02-18_23:27:27 83387 lib/FHEM/Devices/SIGNALduino/SD_Protocols.pm
 UPD 2026-07-04_19:42:43 4115 lib/FHEM/Devices/SIGNALduino/SD_Utils.pm
-UPD 2026-07-16_18:16:54 259898 lib/FHEM/Devices/SIGNALduino/SD_Protocols/Data.pm
+UPD 2026-11-26_13:18:17 259898 lib/FHEM/Devices/SIGNALduino/SD_Protocols/Data.pm
